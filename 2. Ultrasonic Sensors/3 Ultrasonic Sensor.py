@@ -55,7 +55,8 @@ CAN BE DAMAGED IF INCORRECTLY WIRED.
 """
 
 # Imports
-import RPI.GPIO as GPIO
+import RPi.GPIO as GPIO
+import time
 from time import sleep as sleep
 
 # GPIO config

@@ -27,8 +27,12 @@ Author: Asad Maza - Group 3
 """
 
 # Imports
-import RPI.GPIO as GPIO
+import RPi.GPIO as GPIO
 from time import sleep as sleep
+from gpio_reset import all_pins_to_off
+
+# Set all pins to off before main code
+all_pins_to_off()
 
 # GPIO config
 GPIO.setmode(GPIO.BCM)
@@ -59,8 +63,8 @@ try:
 # Break out
 except KeyboardInterrupt:
     print("Terminating module")
-    GPIO.cleanup()
-
+    all_pins_to_off()
+    
 # Cleanup
 finally:
-    GPIO.cleanup()      
+    all_pins_to_off()
