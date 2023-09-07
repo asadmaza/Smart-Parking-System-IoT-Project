@@ -24,7 +24,7 @@ Setup:
 Need to setup first on https://pimylifeup.com/raspberry-pi-lcd-16x2/
 
 Remember to install the Adafruit library and run the code as root
-(use sudo).
+(use sudo). I have created a file install_dependencies.sh to help out
 
 Ensure you connect everything as below:
 
@@ -61,8 +61,13 @@ CAN BE DAMAGED IF INCORRECTLY WIRED.
 """
 # Imports
 import RPi.GPIO as GPIO
-from time import time, sleep as time, sleep
+import time
 import Adafruit_CharLCD as LCD
+from gpio_reset import all_pins_to_off
+
+# Set all pins to off before main code
+all_pins_to_off()
+
 
 # Setup GPIO for Ultrasonic sensor
 TRIG = 17
@@ -84,7 +89,8 @@ lcd_rows      = 2
 
 # Initialise LCD object
 lcd = LCD.Adafruit_CharLCD(lcd_rs, lcd_en, lcd_d4, lcd_d5, lcd_d6, lcd_d7, lcd_columns, lcd_rows, lcd_backlight)
-
+# Set cursor blinks off
+lcd.blink(False)
 # Define distance measuring function
 def distance():
     GPIO.output(TRIG, False)
@@ -106,6 +112,8 @@ def distance():
     
     return distance
 
+
+
 # main loop
 try:
     while True:
@@ -113,7 +121,7 @@ try:
         print("Distance:",dist,"cm")
 
         lcd.clear()
-        lcd.message(f"Distance: {dist} cm")
+        lcd.message(f"Dist: {dist}")
         
         time.sleep(1)
 
@@ -121,4 +129,7 @@ try:
 except KeyboardInterrupt:
     print("Measurement stopped by user")
     lcd.clear()
-    GPIO.cleanup()
+    all_pins_to_off()
+    
+finally:
+    all_pins_to_off()
