@@ -14,12 +14,12 @@ Setup:
 Ensure LEDs are connected to correct GPIO ports
 The below is reference for the Dictionary
 
-LED(2) 	# Sensor 1 - Reserved; Red LED
-LED(3)	# Sensor 1 - Reserved; Yellow LED
-LED(4)	# Sensor 2 - General; Red LED
-LED(14)	# Sensor 2 - General; Green LED
-LED(15)	# Sensor 2 - General; Red LED
-LED(18)	# Sensor 2 - General; Green LED
+LED(2) 	# Bay 1 - Reserved; Red LED
+LED(3)	# Bay 1 - Reserved; Yellow LED
+LED(4)	# Bay 2 - General; Red LED
+LED(14)	# Bay 2 - General; Green LED
+LED(15)	# Bay 3 - General; Red LED
+LED(18)	# Bay 3 - General; Green LED
 ----------------------------------------------------------
 
 Date: 03/09/2023

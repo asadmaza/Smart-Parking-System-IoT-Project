@@ -36,7 +36,7 @@ Ultrasonic sensor:
 • Wire from R1 and R2+R3 connects to Pin 16 (GPIO 23)
 • GND connects to Pin 34 (Ground)
 
-LCD Display 16x02:
+Adafruit LCD Display 16x02:
 • LCD Pin 1 (Ground) to Pin 39 (GND)
 • LCD Pin 2 (VCC/5V) to Pin 2 (5V)
 • LCD Pin 3 (V0) to middle leg of Potentiometer
