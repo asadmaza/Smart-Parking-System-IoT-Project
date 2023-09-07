@@ -1,6 +1,6 @@
 import requests
 
-url = 'localhost:5000/receiveStatusChange'
+url = 'http://localhost:5000/receiveStatusChange' #move this to config file
 
 
 
@@ -19,18 +19,12 @@ parkingBay = { # will change to read each initial space status based on csv whic
 while(True):
     statusChangeInput = input("input the bay name and status to : ") #Change this to actual sensor read
     arrayOfInput = statusChangeInput.split("-")
-    print(arrayOfInput[0])
-    print(arrayOfInput[1])
-    print(parkingBay[arrayOfInput[0]])
-    if(arrayOfInput[1] == 'freeSpace'):
-        status = 0
-    elif(arrayOfInput[1] == 'occupiedSpace'):
-        status = 1
-    elif(arrayOfInput[1] == 'reservedSpace'):
-        status = 2
+    status = int(arrayOfInput[1])
     if(parkingBay[arrayOfInput[0]] != status):
-        postObject = {
-                        'targetSpace':arrayOfInput[0],
-                        'targetStatus':status,
-                    }
-        print(postObject)
+        jsonData = {
+            "parkingName" : arrayOfInput[0],
+            "statusChange" : status
+        }
+        x = requests.post(url, json = jsonData)
+        print(x.text)
+        parkingBay[arrayOfInput[0]] = status
