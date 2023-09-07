@@ -55,9 +55,13 @@ CAN BE DAMAGED IF INCORRECTLY WIRED.
 """
 
 # Imports
-import RPI.GPIO as GPIO
+import RPi.GPIO as GPIO
+import time
 from time import sleep as sleep
+from gpio_reset import all_pins_to_off
 
+# Set all pins to off before main code
+all_pins_to_off()
 # GPIO config
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
@@ -109,4 +113,4 @@ if __name__ == '__main__':
     # Break out
     except KeyboardInterrupt:
         print("Measurement stopped")
-        GPIO.cleanup() 
+        all_pins_to_off()
