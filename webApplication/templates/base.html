@@ -1,0 +1,25 @@
+<!doctype html>
+<title>{% block title %}{% endblock %} Smart Indoor Parking System</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<section class="content">
+  <header>
+    {% block header %}{% endblock %}
+    <h2>Numbers of available parking space : {{ result.availableSpace }}</h2>
+    <h2>Numbers of reserved parking space : {{ result.reservedSpace }}</h2>
+    <h2>Numbers of occupied parking space : {{ result.occupiedSpace }}</h2>
+  </header>
+  {% block content %}
+    {% for bayDetail in result.perBay %}
+        <div class="flash">
+            <h3>{{ bayDetail.parkingBayName }}</h3>
+            {% if bayDetail.status == 0 %}
+                <h3>Free Space</h3>
+            {% elif bayDetail.status == 1 %}
+                <h3>Occupied Space</h3> 
+            {% elif bayDetail.status == 2 %}
+                <h3>Reserved Space</h3>
+            {% endif %}
+        </div> 
+    {% endfor %}
+  {% endblock %}
+</section>
