@@ -7,6 +7,11 @@ Test file for Smart Parking System Integration. Specifically, for
 the 3 sets of LED indicators, 3x Ultrasonic sensors, 1x LCD Display
 for the project.
 
+v2 Changelog :
+- changed LED assignment, was incorrect
+- added states to Bays
+- changed LCD display method
+
 Components required:
 x6 5mm LED
 x1 Raspberry Pi Kit (RPI, cables, power source, breadboard etc.)
@@ -19,7 +24,7 @@ x1 10K ohm potentiometer
 
 Code description:
 This is the Smart Parking System script. There are 3 Bays in total,
-two types, one is reserved and another general... TO DO
+two types, one is reserved and another general....TO DO
 
 Bay 1 - Reserved:
 LED(GPIO 2) - Yellow LED
@@ -96,7 +101,7 @@ Adafruit LCD Display 16x02:
 
 --------------------------------------------------------------------
 
-Date: 07/09/2023
+Date: 08/09/2023
 Author: Asad Maza - Group 3
 
 ====================================================================
@@ -155,11 +160,11 @@ def read_distance(TRIG, ECHO):
     distance = round(distance, 2)
     return distance
 
-# LED and sensor mapping for each bay
+# LED, sensor and state mapping for each bay
 bay_mapping = {
-    'Bay1': {'yellow_or_green_led': 2, 'red_led': 3, 'sensor_trigger': 17, 'sensor_echo': 23},
-    'Bay2': {'yellow_or_green_led': 4, 'red_led': 14, 'sensor_trigger': 27, 'sensor_echo': 24},
-    'Bay3': {'yellow_or_green_led': 15, 'red_led': 18, 'sensor_trigger': 22, 'sensor_echo': 10}
+    'Bay1': {'red_led': 2, 'yellow_or_green_led': 3, 'sensor_trigger': 17, 'sensor_echo': 23, 'state': 0},
+    'Bay2': {'red_led': 4, 'yellow_or_green_led': 14, 'sensor_trigger': 27, 'sensor_echo': 24, 'state': 0},
+    'Bay3': {'red_led': 15, 'yellow_or_green_led': 18, 'sensor_trigger': 22, 'sensor_echo': 10,'state': 0}
 }
 
 # Setup GPIO for LEDs
@@ -170,11 +175,15 @@ for bay, info in bay_mapping.items():
     GPIO.setup(info['sensor_echo'], GPIO.IN)
 
 # Initialize state
-available_bays = 3
+lcd.clear()
+available_bays = 0
 max_bays = 3
 min_bays = 0
-lcd.clear()
-lcd.message(f"Available: {available_bays}")
+# for bay, info in bay_mapping.items():
+#     if info['state'] == 0:
+#         available_bays += 1
+# print(f"Initialised {available_bays} bays")
+# lcd.message(f"Available: {available_bays}")
 
 
 # Main loop
@@ -183,29 +192,36 @@ try:
         for bay, info in bay_mapping.items():
             # Read distance from ultrasonic sensor
             dist_measured = read_distance(info['sensor_trigger'], info['sensor_echo'])
-            print(f"{bay} Distance: {dist_measured}")
             # Check if toy car is present
             if dist_measured < 5.0 and dist_measured >= 0.0:	# 5cm threshold for toy car presence
                 # Turn off yellow/green LED and turn on red LED
                 GPIO.output(info['yellow_or_green_led'], False)
                 GPIO.output(info['red_led'], True)
                 # Update available bays
-                if available_bays < min_bays:
-                    available_bays -= 1
+                if info['state'] == 0:
+                    info['state'] = 1
+                    
             if dist_measured > 5.0:
                 # Turn on yellow/green LED and turn off red LED
                 GPIO.output(info['yellow_or_green_led'], True)
                 GPIO.output(info['red_led'], False)
                 # Update available bays
-                if available_bays < max_bays:
+                if info['state'] == 1:
+                    info['state'] = 0
+                    
+            # Update LCD display with no of available bays
+            # Print the bay, distance measured
+            for bay, info in bay_mapping.items():
+                if info['state'] == 0 and available_bays < max_bays:
                     available_bays += 1
-        # Update LCD display with no of available bays
-        # Print the bay, distance measured
-        print(f"{bay} Distance: {dist_measured}")
-        lcd.clear()
-        lcd.message(f"Available: {available_bays}")
-        time.sleep(0.05)
-        
+                if info['state'] == 1 and available_bays < min_bays:
+                    available_bays += 0
+                    
+            print(f"{bay} Distance: {dist_measured} State: {info['state']} Available bays: {available_bays}")
+            lcd.clear()
+            lcd.message(f"Available: {available_bays}")
+            time.sleep(0.05)
+            
 # Break out
 except KeyboardInterrupt:
     print("Terminating module")
