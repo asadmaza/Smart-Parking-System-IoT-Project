@@ -3,12 +3,11 @@ Repository for Group 3 Course CITS5506 2023 Second Semester
 
 ## To Do List
 ### raspberry Script
-    - make a fake function to do post function, the target is localhost webapp
+    - adjust the input from manual typing to read from a sensor
 
 ### web application    
-    - make function to actually receive the post request
-    - make simple html to display the bay status and number of available parking space
-    - make a function to do CRUD to database
+    - make a pretty webapp rather than a simple one
+    - apply best practice such as separate config
 
 ## How to run
 1. create a new virtual environment
@@ -23,3 +22,11 @@ Repository for Group 3 Course CITS5506 2023 Second Semester
 4. run the web app
     cd webApplication
     flask --app index run
+
+## How to create local db for testing or maybe funsies
+1. install sqlite3
+2. cd to webApplicatoin/databaseStruct
+3. run
+    sqlite3 mockIoTDB.db < initdb.sql 
+4. run to populate the mock data to the database
+    cat insertToDetail.sql | sqlite3 mockIoTDB.db
