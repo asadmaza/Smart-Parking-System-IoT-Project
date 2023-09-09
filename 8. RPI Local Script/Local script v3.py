@@ -14,7 +14,7 @@ v3 Changelog :
 
 Components required:
 x1 Raspberry Pi Kit (RPI, cables, power source, breadboard etc.)
-x6 5mm LED
+x6 5mm LED (x3 Red, x1 Yellow, x2 Green)
 x6 220 - 330 ohm resistor
 x3 HC-SR04 Ultrasonic Sensor
 x9 1K ohm resistor
@@ -174,10 +174,10 @@ max_bays = 3
 min_bays = 0
 lcd.message("""Initialising
 System""")
-
 for bay,  info in bay_mapping.items():
     GPIO.output(info['yellow_or_green_led'], True)
 
+# main loop
 try:
     while True:
         available_bays = 0  # Reset the count of available bays        
