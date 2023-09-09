@@ -11,6 +11,7 @@ v3 Changelog :
 - changed print output to show distance and sensors for debugging
 - added print output for stopping script
 - updated conditional logic's distance threshold
+- updated bay dictionary, mapped type of bay (reserved and general)
 
 Components required:
 x1 Raspberry Pi Kit (RPI, cables, power source, breadboard etc.)
@@ -153,11 +154,11 @@ def read_distance(TRIG, ECHO):
     distance = round(distance, 2)
     return distance
 
-# LED, sensor and state mapping for each bay
+# LED, sensor, state and type mapping for each bay
 bay_mapping = {
-    'Bay1': {'red_led': 2, 'yellow_or_green_led': 3, 'sensor_trigger': 17, 'sensor_echo': 23, 'state': 0},
-    'Bay2': {'red_led': 4, 'yellow_or_green_led': 14, 'sensor_trigger': 27, 'sensor_echo': 24, 'state': 0},
-    'Bay3': {'red_led': 15, 'yellow_or_green_led': 18, 'sensor_trigger': 22, 'sensor_echo': 10,'state': 0}
+    'Bay1': {'red_led': 2, 'yellow_or_green_led': 3, 'sensor_trigger': 17, 'sensor_echo': 23, 'state': 0, 'type': 'reserved'},
+    'Bay2': {'red_led': 4, 'yellow_or_green_led': 14, 'sensor_trigger': 27, 'sensor_echo': 24, 'state': 0, 'type': 'general'},
+    'Bay3': {'red_led': 15, 'yellow_or_green_led': 18, 'sensor_trigger': 22, 'sensor_echo': 10,'state': 0, 'type': 'general'}
 }
 
 # Setup GPIO for LEDs
