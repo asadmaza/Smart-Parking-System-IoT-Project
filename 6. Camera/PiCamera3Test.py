@@ -17,10 +17,14 @@ uses PiCamera2 and OpenCV to livestream in a window on Raspberry Pi.
 Setup:
 Ensure you connect the Pi Camera 3 module to the Camera port.
 
-Remember to install OpenCV library, Qt 5 GUI module commands in
-terminal:
+Remember to install OpenCV library, type commands in terminal:
 sudo apt-get update
 sudo apt-get install python3-opencv
+Y
+
+sudo apt-get install libqt5gui5 libqt5test5 python3-sip^
+python3-pyqt5 libjasper-dev libatlas-base-dev libhdf5-dev^
+libhdf5-serial-dev -y
 
 pip3 install opencv-contrib-python==4.5.5.62
 pip3 install -U numpy
@@ -31,30 +35,21 @@ import cv2
 cv2.__version__
 should return 4.5.5
 
-Enable the camera through terminal or settings:
-Terminal -> sudo raspi-config -> Enable Camera
-Settings -> Interface Options -> Camera -> Enable
-
-
+Disable the camera through terminal or settings:
+Terminal -> sudo raspi-config -> Disable Camera
+Settings -> Interface Options -> Camera -> Disable
+- legacy Camera settings are for Pi Camera module 2, not 3
 
 Testing camera natively through terminal:
--	Is camera detected? -> vcgencmd get_camera
-    if detected, returns: supported=1 detected=1 
+libcamera-hello -t 0
+-> preview window, CTRL + C to terminate
 
--	Test capture image -> raspistill -o test.jpg
-    saves test.jpg in current folder
 
--	Test video capture -> raspivid -o testVid.h264 -t 10000
-    Saves 10s video testVid.h264 in current folder
+
 --------------------------------------------------------------------
 Code adapted from:
 1. https://my.cytron.io/tutorial/face-detection-on-
 raspberry-pi4-using-opencv-and-camera-module
-
-Unused packages (I think):
-sudo apt-get install libqt5gui5 libqt5test5 ^
-python3-sip python3-pyqt5 libjasper-dev ^
-libatlas-base-dev libhdf5-dev -y
 
 2. PiCamera 2 Beta release docs
 https://pypi.org/project/picamera2/
@@ -78,21 +73,22 @@ from picamera2 import Picamera2
 picam2 = Picamera2()
 picam2.configure(picam2.create_preview_configuration(main={"format": 'XRGB8888', "size": (640, 480)}))
 picam2.start()
+print("-"*80)
+print("""Press CTRL + C in IDE to quit the preview window properly.
+Alternatively, press Q in camera preview window.""")
 
 # Loop to continually get frames from camera
-while True:
-    im = picam2.capture_array()
-    cv2.imshow("Camera 3 Preview", im)
-
-    # Press 'q' to close the window
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-
-# Release resources
-cv2.destroyAllWindows()
-picam2.stop_preview()  # Stop the camera preview
-
-
-# Release capture and destroy all OpenCV windows
-videoCapture.release()
-cv2.destroyAllWindows()
+try:
+    while True:
+        im = picam2.capture_array()
+        cv2.imshow("Pi Camera Module 3 Preview", im)
+        # Press 'q' to close the window
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+    # Release capture and destory all windows
+    cv2.destroyAllWindows()
+    picam2.stop_preview()
+except KeyboardInterrupt:
+    # Release capture and destory all windows
+    cv2.destroyAllWindows()
+    picam2.stop_preview()
