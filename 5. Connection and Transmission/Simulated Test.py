@@ -4,7 +4,7 @@ ONLY RUN AFTER YOU HAVE DOUBLE CHECKED CONNECTIONS AS COMPONENTS
 CAN BE DAMAGED IF INCORRECTLY WIRED.
 ====================================================================
 Test file to ensure there is a two-way connection to a Cloud
-Platform - AWS IoT Core.
+Platform - AWS IoT Core, RPI and hardware connnected.
 
 Components required:
 x1 Raspberry Pi Kit (RPI, cables, power source, breadboard etc.)
@@ -31,8 +31,12 @@ Ultrasonic Sensor:
 • Wire from R1 and R2+R3 connects to Pin 16 (GPIO 23)
 • GND connects to Pin 34 (Ground)
 
-Need to setup AWS IoT Core, follow Setup Guide
-Install AWSIoTPythonSDK, using terminal:
+Setup AWS IoT Core:
+If you haven't already done Basic pubsub test.py then:
+1. Create device on AWS IoT Core, guide in the file
+"Plan for BAckend and Front End.docx"
+
+2. Install AWSIoTPythonSDK, using terminal:
 pip install AWSIoTPythonSDK
 Successfully installed AWSIoTPythonSDK-1.5.2
 
@@ -74,9 +78,9 @@ def read_distance(TRIG, ECHO):
     distance = round(distance, 2)
     return distance
 
-# LED, sensor and state mapping for each bay
+# LED, sensor, state and type mapping for each bay
 bay_mapping = {
-    'Bay1': {'red_led': 2, 'yellow_or_green_led': 3, 'sensor_trigger': 17, 'sensor_echo': 23, 'state': 0},
+    'Bay1': {'red_led': 2, 'yellow_or_green_led': 3, 'sensor_trigger': 17, 'sensor_echo': 23, 'state': 0, 'type':'reserved'},
 }
 
 # Setup GPIO for LEDs
