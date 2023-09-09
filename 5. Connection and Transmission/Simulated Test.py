@@ -31,6 +31,11 @@ Ultrasonic Sensor:
 • Wire from R1 and R2+R3 connects to Pin 16 (GPIO 23)
 • GND connects to Pin 34 (Ground)
 
+Need to setup AWS IoT Core, follow Setup Guide
+Install AWSIoTPythonSDK, using terminal:
+pip install AWSIoTPythonSDK
+Successfully installed AWSIoTPythonSDK-1.5.2
+
 --------------------------------------------------------------------
 
 Date: 09/09/2023
@@ -45,7 +50,7 @@ CAN BE DAMAGED IF INCORRECTLY WIRED.
 import RPi.GPIO as GPIO
 import time
 from gpio_reset import all_pins_to_off
-
+import AWSIoTPythonSDK 
 # Set all pins to off before main code
 all_pins_to_off()
 
