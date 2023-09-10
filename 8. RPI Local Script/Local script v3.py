@@ -5,13 +5,14 @@ CAN BE DAMAGED IF INCORRECTLY WIRED.
 ====================================================================
 Test file for Smart Parking System Integration.
 
-v3 Changelog :
+v3.1 Changelog :
 - Initialisation changed, makes it clearer when system is running
 - removed random commented out code, cleaned code
 - changed print output to show distance and sensors for debugging
 - added print output for stopping script
 - updated conditional logic's distance threshold
 - updated bay dictionary, mapped type of bay (reserved and general)
+- updated time.sleep(1) instead of 2 in read_distance function
 
 Components required:
 x1 Raspberry Pi Kit (RPI, cables, power source, breadboard etc.)
@@ -141,7 +142,7 @@ lcd.blink(False)
 # Define distance measuring function
 def read_distance(TRIG, ECHO):
     GPIO.output(TRIG, False)
-    time.sleep(2)    
+    time.sleep(1)    
     GPIO.output(TRIG, True)
     time.sleep(0.00001)
     GPIO.output(TRIG, False)    
