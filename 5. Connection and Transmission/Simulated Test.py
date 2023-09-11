@@ -3,8 +3,7 @@
 ONLY RUN AFTER YOU HAVE DOUBLE CHECKED CONNECTIONS AS COMPONENTS
 CAN BE DAMAGED IF INCORRECTLY WIRED.
 ====================================================================
-Test file to ensure there is a two-way connection to a Cloud
-Platform - AWS IoT Core.
+Test file to send single bay data to a Cloud Platform - AWS IoT Core.
 
 Components required:
 x1 Raspberry Pi Kit (RPI, cables, power source, breadboard etc.)
@@ -14,9 +13,10 @@ x2 330 ohm resistors
 x1 Ultrasonic Sensor
 
 Code description:
-I'm not sure what I want to achieve yet. Bit of iteration lets go!
-Going to simulate a single bay and see if I can get a two way
-connection somehow to update states of LED and send sensor data
+Simulates a single bay and sends data to AWS IoT Core. Sends bay
+status every 10 seconds, can modify frequency in
+publish_bay_mapping_interval. Check out plan doc page 2 for example
+of what successful test looks like.
 --------------------------------------------------------------------
 Setup:
 
@@ -31,14 +31,26 @@ Ultrasonic Sensor:
 • Wire from R1 and R2+R3 connects to Pin 16 (GPIO 23)
 • GND connects to Pin 34 (Ground)
 
-Need to setup AWS IoT Core, follow Setup Guide
-Install AWSIoTPythonSDK, using terminal:
+Setup AWS IoT Core:
+If you haven't already done Basic pubsub test.py then:
+1. Create device on AWS IoT Core, guide in the file
+"Plan for BAckend and Front End.docx"
+
+2. Install AWSIoTPythonSDK, using terminal:
 pip install AWSIoTPythonSDK
 Successfully installed AWSIoTPythonSDK-1.5.2
 
+Ensure you have successfully run "mqtt pubsub test.py" first or
+this won't work.
+
+Troubleshooting:
+1. Security policy is setup so that client can connect and
+pub/sub
+2. Check configuration for MQTT Client - name of client and
+credentials
 --------------------------------------------------------------------
 
-Date: 09/09/2023
+Date: 10/09/2023
 Author: Asad Maza - Group 3
 
 ====================================================================
@@ -46,13 +58,29 @@ ONLY RUN AFTER YOU HAVE DOUBLE CHECKED CONNECTIONS AS COMPONENTS
 CAN BE DAMAGED IF INCORRECTLY WIRED.
 ====================================================================
 """
+
 # Imports
 import RPi.GPIO as GPIO
 import time
+import json
+from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
 from gpio_reset import all_pins_to_off
-import AWSIoTPythonSDK 
+import logging
+# Connection debugging
+logging.basicConfig(level=logging.DEBUG)
+
 # Set all pins to off before main code
 all_pins_to_off()
+
+# AWS IoT client setup
+myMQTTClient = AWSIoTMQTTClient("Asad-RaspberryPi")
+myMQTTClient.configureEndpoint("a2mqsm6nqkmbh6-ats.iot.ap-southeast-2.amazonaws.com", 8883)
+myMQTTClient.configureCredentials("/home/asadRPI/Desktop/AWS IoT Core/root-CA.crt",
+                                      "/home/asadRPI/Desktop/AWS IoT Core/RaspberryPi-Asad.private.key",
+                                      "/home/asadRPI/Desktop/AWS IoT Core/RaspberryPi-Asad.cert.pem")
+
+# Confirm MQTT Connection
+myMQTTClient.connect()
 
 # GPIO config
 GPIO.setmode(GPIO.BCM)
@@ -61,7 +89,7 @@ GPIO.setwarnings(False)
 # Define distance measuring function
 def read_distance(TRIG, ECHO):
     GPIO.output(TRIG, False)
-    time.sleep(2)    
+    time.sleep(1) # changed sleep time to read faster.
     GPIO.output(TRIG, True)
     time.sleep(0.00001)
     GPIO.output(TRIG, False)    
@@ -74,51 +102,82 @@ def read_distance(TRIG, ECHO):
     distance = round(distance, 2)
     return distance
 
-# LED, sensor and state mapping for each bay
+# Mapping Bay
 bay_mapping = {
-    'Bay1': {'red_led': 2, 'yellow_or_green_led': 3, 'sensor_trigger': 17, 'sensor_echo': 23, 'state': 0},
+    'Bay1': {'red_led': 2, 'yellow_or_green_led': 3, 'sensor_trigger': 17, 'sensor_echo': 23, 'state': 0, 'type': 'reserved'},
 }
 
-# Setup GPIO for LEDs
+# Initialise interval variables for publish and check bay status
+publish_bay_mapping_interval = 10  # Publish every 10 seconds
+check_bay_status_interval = 0.025  # Queries bay status every (1 + 0.025) seconds
+
+last_publish_time = time.time()
+last_check_time = time.time()
+
+
+# GPIO setup
 for bay, info in bay_mapping.items():
     GPIO.setup(info['yellow_or_green_led'], GPIO.OUT)
     GPIO.setup(info['red_led'], GPIO.OUT)
     GPIO.setup(info['sensor_trigger'], GPIO.OUT)
     GPIO.setup(info['sensor_echo'], GPIO.IN)
 
+last_publish_time = time.time()
+last_check_time = time.time()
+
 try:
     while True:
-        for bay, info in bay_mapping.items():
-            # Read distance from ultrasonic sensor
-            dist_measured = read_distance(info['sensor_trigger'], info['sensor_echo'])
-            # Check toy car presence
-            # 5cm threshold for toy car
-            if dist_measured <= 5.0 and dist_measured >= 0.0:
-                # Turn off yellow/green LED and turn on red LED
-                GPIO.output(info['yellow_or_green_led'], False)
-                GPIO.output(info['red_led'], True)
-                # Update available bays
-                if info['state'] == 0:
-                    info['state'] = 1
-
-            if dist_measured > 5.0:
-                # Turn on yellow/green LED and turn off red LED
-                GPIO.output(info['yellow_or_green_led'], True)
-                GPIO.output(info['red_led'], False)
-                # Update available bays
-                if info['state'] == 1:
-                    info['state'] = 0
+        current_time = time.time()
+        # Check the status of each bay if enough time has elapsed since the last check
+        if current_time - last_check_time >= check_bay_status_interval:
+            # Update the time of the last check
+            last_check_time = current_time
             
-            # Print for testing purposes
-            print(f"{bay} Distance: {dist_measured} State: {info['state']}")
-        print("-"*80)
-        print("To stop script correctly, press CTRL + C, ensure all_pins_to_off() function runs")
+            timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+            for bay, info in bay_mapping.items():
+                dist_measured = read_distance(info['sensor_trigger'], info['sensor_echo'])
+                
+                # Check toy car presence based on Ultrasonic sensor distance measurement
+                if dist_measured <= 5.0 and dist_measured >= 0.0: # 5cm threshold
+                    # Turn off yellow/green LED and turn on red LED
+                    GPIO.output(info['yellow_or_green_led'], False)
+                    GPIO.output(info['red_led'], True)
+                    # Update available bays
+                    if info['state'] == 0:
+                        info['state'] = 1
+                
+                elif dist_measured > 5.0:
+                    # Turn on yellow/green LED and turn off red LED
+                    GPIO.output(info['yellow_or_green_led'], True)
+                    GPIO.output(info['red_led'], False)
+                    # Update available bays
+                    if info['state'] == 1:
+                        info['state'] = 0
+                
+                # Print for testing purposes
+                print(f"{bay} Distance: {dist_measured} State: {info['state']}")
+        
+        if current_time - last_publish_time >= publish_bay_mapping_interval:
+            # Update last_publish_time
+            last_publish_time = current_time
+            
+            print("-"*80)
+            print("To stop script correctly, press CTRL + C, ensure all_pins_to_off() function runs")
+            print("Publishing bay_mapping to AWS IoT")
+            
+            try:
+                myMQTTClient.publish("sdk/test/python", json.dumps({"timestamp": timestamp, "data": bay_mapping}), 1)
+            except Exception as e:
+                print(f"An exception occurred while publishing: {e}")
 
-# Break out
+        # Sleep briefly to prevent the while loop from consuming 100% CPU
+        time.sleep(0.01)
+
+# Break out and clean up resources
 except KeyboardInterrupt:
-    print("Terminating module")
+    print("Terminating and cleaning up")
     all_pins_to_off()
-    
-# Cleanup
-finally:
-    all_pins_to_off()
+    GPIO.cleanup()
+    myMQTTClient.disconnect()
+
+myMQTTClient.disconnect()
