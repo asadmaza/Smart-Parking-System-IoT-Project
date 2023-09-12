@@ -5,7 +5,8 @@ CAN BE DAMAGED IF INCORRECTLY WIRED.
 ====================================================================
 Test file to send single bay data to a Cloud Platform - AWS IoT Core.
 
-Changelog v2:
+Changelog v2.1:
+- Updated code to publish data when initialised
 - Updated bay mapping to include booking for booking option via
 WebApp for reserved bay - can map another LED to this (White/Blue)
 - Only send data when state of bay actually changes, added previous
@@ -75,6 +76,7 @@ import json
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
 from gpio_reset import all_pins_to_off
 import logging
+
 # Connection debugging
 logging.basicConfig(level=logging.DEBUG)
 
@@ -126,6 +128,9 @@ check_bay_status_interval = 0.5  # Queries bay status every (1 + 0.5) seconds
 last_publish_time = time.time()
 last_check_time = time.time()
 
+last_publish_time = 0
+last_check_time = time.time()
+
 
 # GPIO setup
 for bay, info in bay_mapping.items():
@@ -134,11 +139,11 @@ for bay, info in bay_mapping.items():
     GPIO.setup(info['sensor_trigger'], GPIO.OUT)
     GPIO.setup(info['sensor_echo'], GPIO.IN)
 
-last_publish_time = time.time()
-last_check_time = time.time()
 
 try:
+    initial_publish = True # Flag to force initial publish
     state_changed = False  # Flag to indicate whether state has changed
+    
     while True:
         current_time = time.time()
         
@@ -155,6 +160,7 @@ try:
                 info['prev_state'] = info['state']
                 
                 # Check toy car presence based on Ultrasonic sensor distance measurement
+                # Current threshold is 5cm
                 if dist_measured <= 5.0 and dist_measured >= 0.0:
                     GPIO.output(info['yellow_or_green_led'], False)
                     GPIO.output(info['red_led'], True)
@@ -171,10 +177,12 @@ try:
                 
                 print(f"{bay} Distance: {dist_measured} State: {info['state']}")
                 
-        # Publish only if any state has changed
-        if state_changed and current_time - last_publish_time >= publish_bay_mapping_interval:
+        # Publish if either any state has changed or for initial publish
+        if (state_changed or initial_publish) and current_time - last_publish_time >= publish_bay_mapping_interval:
+            timestamp = time.strftime("%Y-%m-%d %H:%M:%S")  # Update timestamp here
             last_publish_time = current_time
-            state_changed = False  # Reset the flag
+            state_changed = False  # Reset state flag
+            initial_publish = False  # Reset initial_publish flag
             
             print("-"*80)
             print("To stop script correctly, press CTRL + C, ensure all_pins_to_off() function runs")
@@ -191,5 +199,3 @@ except KeyboardInterrupt:
     print("Terminating and cleaning up")
     all_pins_to_off()
     myMQTTClient.disconnect()
-
-myMQTTClient.disconnect()
