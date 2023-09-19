@@ -26,6 +26,7 @@ FEEDBACK_FROM_DEVICE_WHEN_BAY_IS_RESERVED = "FEEDBACK_FROM_DEVICE_WHEN_BAY_IS_RE
 feedbackWaitingControl = False
 
 def customCallback(client, userdata, message):
+    print(message.topic)
     if(message.topic == BAY_STATUS_CHANGE_FROM_DEVICE):
         print("Received a bay status change from device : ")
         print(message.payload.decode("utf-8"))
@@ -198,17 +199,26 @@ def resettingExpiredBay():
 # function to subscribe the mqtt topic and change the status accordingly (when a car is entering a valid bay, when a car is exiting a non-reserved bay, 
 # when a car is entering a reserved bay, when a car is exiting a reserved bay)
 def statusChangeFromDevice(messagePayload):
-    print(messagePayload)
+    json_object = json.loads(messagePayload)
+    timeStamp = json_object["timestamp"]
+    dataDictionary = json_object["data"]
+    for i in dataDictionary:
+        parkingName = i
+        state = dataDictionary[i]["state"]
+        previousState = dataDictionary[i]["prev_state"]
+        bayType = dataDictionary[i]["bay_type"]
+        isBayBooked = dataDictionary[i]["is_bay_booked"]
+        
     getParkingBayDetail = select(ParkingBayDetail).where(ParkingBayDetail.parking_bay_name==parkingName) #change to actual variable from the message payload
     queryResult = createConnectionAndExecuteQuery(getParkingBayDetail)
     for row in queryResult:
         parkingBayId = int(row.rowid)
         parkingName = row.parking_bay_name
-    if(statusChange == 0): #change to actual variable from the message payload
+    if(statusChange == 0): # change to actual variable from the message payload
         print("car is exiting parking bay")
         latestParkingBayTimestamp = select(ParkingBayTimestamp).where(ParkingBayTimestamp.parking_bay_id==parkingBayId).order_by(ParkingBayTimestamp.parking_bay_entry_time.desc()).limit(1)
         executeQueryFindLatestParkingStamp = createConnectionAndExecuteQuery(latestParkingBayTimestamp)
-        #create exception when no data is found
+        # create exception when no data is found
         for row in executeQueryFindLatestParkingStamp:
             timeStampRowid = row.rowid
             parkingBayId = row.parking_bay_id
@@ -227,7 +237,7 @@ def statusChangeFromDevice(messagePayload):
         
         db.session.commit()
 
-    elif(statusChange == 1): #change to actual variable from the message payload
+    elif(statusChange == 1): # change to actual variable from the message payload
         print("car is entering parking bay")
         updateParkingBayDetailQuery = ParkingBayDetail.query.filter_by(rowid=parkingBayId).first()
         
@@ -256,7 +266,7 @@ def giveinitialBayState():
 @app.route("/publish_test")
 def publishTest():
     print('Begin Publish')
-    myMQTTClient.publish(TOPIC, json.dumps({"message":MESSAGE}), 1)
+    myMQTTClient.publish("HELLO", json.dumps({"message":BAY_STATUS_CHANGE_FROM_DEVICE}), 1)
     return "<p>nice one</p>"
 
 @app.route("/")
