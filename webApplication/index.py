@@ -260,7 +260,16 @@ def giveinitialBayState():
     # To-Do -> implement this function
     # query and get all the parking bay detail
     # publish to the raspberry pi
-    return redirect("/",200) 
+    parking_bays = ParkingBayDetail.query.all()
+
+    bay_states = {}
+    for row in parking_bays:
+        bay_states[row.parking_bay_name] = row.parking_bay_status
+
+    message = {"bay_states": bay_states}
+    myMQTTClient.publish("INIT_BAY_STATE", json.dumps(message), 1)  
+
+    return redirect("/", 200)
 
 # later deprecate all of below
 @app.route("/publish_test")
