@@ -1,7 +1,7 @@
 APScheduler==3.10.4
-awscrt==0.19.1
+awscrt==0.5.2
 AWSIoTPythonSDK==1.5.2
-awsiotsdk==1.0.0.dev0
+awsiotsdk==1.0.2
 blinker==1.6.2
 certifi==2023.7.22
 charset-normalizer==3.2.0

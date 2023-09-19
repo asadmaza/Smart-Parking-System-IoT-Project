@@ -88,7 +88,7 @@ class BookingParkingBay(db.Model):
     booking_exit_time = db.Column(db.DateTime, nullable=False)
     is_expired = db.Column(db.Integer, nullable=False)
 
-@app.route("/home")
+@app.route("/")
 def homePage():
     arrayOfParkingBay = []
     totalAvailableParkingBay = 0
@@ -178,13 +178,6 @@ def resettingExpiredBay():
         for row in queryResultBookingDetail:
                 bookingId = int(row.rowid)
                 parkingBayId = row.parking_bay_id
-                fullName = row.full_name
-                email = row.email
-                phoneNumber = row.phone_number
-                plateNumber = row.plate_number
-                bookingEntryTime = row.booking_entry_time
-                bookingExitTime = row.booking_exit_time
-                isExpired = row.is_expired
                 
                 updateExpiredParkingBayDetail = ParkingBayDetail.query.filter_by(rowid=parkingBayId).first()
                 updateExpiredParkingBayDetail.parking_bay_status = 0
@@ -199,66 +192,60 @@ def resettingExpiredBay():
 # function to subscribe the mqtt topic and change the status accordingly (when a car is entering a valid bay, when a car is exiting a non-reserved bay, 
 # when a car is entering a reserved bay, when a car is exiting a reserved bay)
 def statusChangeFromDevice(messagePayload):
-    json_object = json.loads(messagePayload)
-    timeStamp = json_object["timestamp"]
-    dataDictionary = json_object["data"]
-    for i in dataDictionary:
-        parkingName = i
-        state = dataDictionary[i]["state"]
-        previousState = dataDictionary[i]["prev_state"]
-        bayType = dataDictionary[i]["bay_type"]
-        isBayBooked = dataDictionary[i]["is_bay_booked"]
-    print(parkingName)
-    print(state)
-    print(previousState)
-    print(bayType)
-    print(isBayBooked)
-    getParkingBayDetail = select(ParkingBayDetail).where(ParkingBayDetail.parking_bay_name==parkingName) #change to actual variable from the message payload
-    queryResult = createConnectionAndExecuteQuery(getParkingBayDetail)
-    for row in queryResult:
-        parkingBayId = int(row.rowid)
-        parkingName = row.parking_bay_name
-    if(statusChange == 0): # change to actual variable from the message payload
-        print("car is exiting parking bay")
-        latestParkingBayTimestamp = select(ParkingBayTimestamp).where(ParkingBayTimestamp.parking_bay_id==parkingBayId).order_by(ParkingBayTimestamp.parking_bay_entry_time.desc()).limit(1)
-        executeQueryFindLatestParkingStamp = createConnectionAndExecuteQuery(latestParkingBayTimestamp)
-        # create exception when no data is found
-        for row in executeQueryFindLatestParkingStamp:
-            timeStampRowid = row.rowid
-            parkingBayId = row.parking_bay_id
-            entryTime = row.parking_bay_entry_time
-        exitTime = timestamp
-        totalDuration = exitTime-entryTime
-        secondsInDay = 24 * 60 * 60
-        totalMinutes = (totalDuration.days * secondsInDay + totalDuration.seconds) / 60
+    with app.app_context():
+        json_object = json.loads(messagePayload)
+        timeStamp = json_object["timestamp"]
+        timeStampDateObject = datetime.strptime(timeStamp, "%Y-%m-%d %H:%M:%S")
+        dataDictionary = json_object["data"]
+        for i in dataDictionary:
+            parkingName = i
+            statusChange = dataDictionary[i]["state"]
+        getParkingBayDetail = select(ParkingBayDetail).where(ParkingBayDetail.parking_bay_name==parkingName) #change to actual variable from the message payload
+        queryResult = createConnectionAndExecuteQuery(getParkingBayDetail)
+        for row in queryResult:
+            parkingBayId = int(row.rowid)
+            parkingName = row.parking_bay_name
+        if(statusChange == 0):
+            print("car is exiting parking bay")
+            latestParkingBayTimestamp = select(ParkingBayTimestamp).where(ParkingBayTimestamp.parking_bay_id==parkingBayId).order_by(ParkingBayTimestamp.parking_bay_entry_time.desc()).limit(1)
+            executeQueryFindLatestParkingStamp = createConnectionAndExecuteQuery(latestParkingBayTimestamp)
+            # create exception when no data is found
+            for row in executeQueryFindLatestParkingStamp:
+                timeStampRowid = row.rowid
+                parkingBayId = row.parking_bay_id
+                entryTime = row.parking_bay_entry_time
+            exitTime = timeStampDateObject
+            totalDuration = exitTime-entryTime
+            secondsInDay = 24 * 60 * 60
+            totalMinutes = (totalDuration.days * secondsInDay + totalDuration.seconds) / 60
 
-        updateParkingBayTimestampQuery = ParkingBayTimestamp.query.filter_by(rowid=timeStampRowid).first()
-        updateParkingBayTimestampQuery.parking_bay_exit_time = exitTime
-        updateParkingBayTimestampQuery.parking_bay_total_minutes = totalMinutes
+            updateParkingBayTimestampQuery = ParkingBayTimestamp.query.filter_by(rowid=timeStampRowid).first()
+            updateParkingBayTimestampQuery.parking_bay_exit_time = exitTime
+            updateParkingBayTimestampQuery.parking_bay_total_minutes = totalMinutes
 
-        updateParkingBayDetailQuery = ParkingBayDetail.query.filter_by(rowid=parkingBayId).first()
-        updateParkingBayDetailQuery.parking_bay_status = statusChange
-        
-        db.session.commit()
-
-    elif(statusChange == 1): # change to actual variable from the message payload
-        print("car is entering parking bay")
-        updateParkingBayDetailQuery = ParkingBayDetail.query.filter_by(rowid=parkingBayId).first()
-        
-        if(updateParkingBayDetailQuery.parking_bay_status == 2):
+            updateParkingBayDetailQuery = ParkingBayDetail.query.filter_by(rowid=parkingBayId).first()
             updateParkingBayDetailQuery.parking_bay_status = statusChange
-            updateBookingDetail = BookingParkingBay.query.filter_by(BookingParkingBay.parking_bay_id==parkingBayId).filter_by(BookingParkingBay.is_expired==0).first()
-            updateBookingDetail.is_expired = 1
-        
-        elif(updateParkingBayDetailQuery.parking_bay_status == 0):
-            updateParkingBayDetailQuery.parking_bay_status = statusChange
+            
+            db.session.commit()
 
-        entry = ParkingBayTimestamp(parking_bay_id = parkingBayId, parking_bay_entry_time = timestamp)
-        db.session.add(entry)
-        
-        db.session.commit() 
+        elif(statusChange == 1):
+            print("car is entering parking bay")
+            updateParkingBayDetailQuery = ParkingBayDetail.query.filter_by(rowid=parkingBayId).first()
+            
+            if(updateParkingBayDetailQuery.parking_bay_status == 2):
+                updateParkingBayDetailQuery.parking_bay_status = statusChange
+                updateBookingDetail = BookingParkingBay.query.filter_by(BookingParkingBay.parking_bay_id==parkingBayId).filter_by(BookingParkingBay.is_expired==0).first()
+                updateBookingDetail.is_expired = 1
+            
+            elif(updateParkingBayDetailQuery.parking_bay_status == 0):
+                updateParkingBayDetailQuery.parking_bay_status = statusChange
 
-    return redirect("/",200)
+            entry = ParkingBayTimestamp(parking_bay_id = parkingBayId, parking_bay_entry_time = timeStampDateObject)
+            db.session.add(entry)
+            
+            db.session.commit() 
+
+        return redirect("/",200)
 
 def giveinitialBayState():
     # To-Do -> implement this function
@@ -274,106 +261,6 @@ def giveinitialBayState():
     myMQTTClient.publish("INIT_BAY_STATE", json.dumps(message), 1)  
 
     return redirect("/", 200)
-
-# later deprecate all of below
-@app.route("/publish_test")
-def publishTest():
-    print('Begin Publish')
-    myMQTTClient.publish("HELLO", json.dumps({"message":BAY_STATUS_CHANGE_FROM_DEVICE}), 1)
-    return "<p>nice one</p>"
-
-@app.route("/")
-def index():
-    arrayOfParkingBay = []
-    totalAvailableParkingBay = 0
-    totalReservedParkingBay = 0
-    totalOccupiedParkingBay = 0
-
-    parking_bays = ParkingBayDetail.query.all()
-
-    for row in parking_bays:
-        parkingBayData = {
-            'parkingBayName':row.parking_bay_name,
-            'status':row.parking_bay_status,
-        }
-        if(row.parking_bay_status == 0):
-            totalAvailableParkingBay = totalAvailableParkingBay + 1
-        elif(row.parking_bay_status == 1):
-            totalReservedParkingBay = totalReservedParkingBay + 1
-        elif(row.parking_bay_status == 2):
-            totalOccupiedParkingBay = totalOccupiedParkingBay + 1
-        arrayOfParkingBay.append(parkingBayData)
-
-    result = {
-        'availableSpace':totalAvailableParkingBay,
-        'reservedSpace':totalReservedParkingBay,
-        'occupiedSpace':totalOccupiedParkingBay,
-        'perBay':arrayOfParkingBay
-    }
-
-    return render_template('base.html',result=result)
-
-@app.route("/receiveStatusChange", methods=['POST'])
-def statusChange():
-    if request.method == 'POST':
-        request_data = request.get_json()
-        parkingName = request_data['parkingName']
-        statusChange = request_data['statusChange']
-        getParkingBayDetail = select(ParkingBayDetail).where(ParkingBayDetail.parking_bay_name==parkingName)
-        queryResult = createConnectionAndExecuteQuery(getParkingBayDetail)
-        for row in queryResult:
-            parkingBayId = int(row.rowid)
-            parkingName = row.parking_bay_name
-        if(statusChange == 0):
-            print("car is exiting parking bay")
-            latestParkingBayTimestamp = select(ParkingBayTimestamp).where(ParkingBayTimestamp.parking_bay_id==parkingBayId).order_by(ParkingBayTimestamp.parking_bay_entry_time.desc()).limit(1)
-            executeQueryFindLatestParkingStamp = createConnectionAndExecuteQuery(latestParkingBayTimestamp)
-            #create exception when no data is found
-            for row in executeQueryFindLatestParkingStamp:
-                timeStampRowid = row.rowid
-                parkingBayId = row.parking_bay_id
-                entryTime = row.parking_bay_entry_time
-            exitTime = datetime.now()
-            totalDuration = exitTime-entryTime
-            secondsInDay = 24 * 60 * 60
-            totalMinutes = (totalDuration.days * secondsInDay + totalDuration.seconds) / 60
-
-            updateParkingBayTimestampQuery = ParkingBayTimestamp.query.filter_by(rowid=timeStampRowid).first()
-            updateParkingBayTimestampQuery.parking_bay_exit_time = exitTime
-            updateParkingBayTimestampQuery.parking_bay_total_minutes = totalMinutes
-
-            # updateParkingBayTimestampQuery = update(ParkingBayTimestamp).where(ParkingBayTimestamp.parking_bay_id==parkingBayId).values(parking_bay_exit_time = exitTime,
-                                                                                                                                        # parking_bay_total_minutes = totalMinutes)
-            # make a try statement
-            # executeQueryUpdateParkingBayTimestamp = createConnectionAndExecuteQuery(updateParkingBayTimestampQuery)
-            
-            updateParkingBayDetailQuery = ParkingBayDetail.query.filter_by(rowid=parkingBayId).first()
-            updateParkingBayDetailQuery.parking_bay_status = statusChange
-            # updateParkingBayDetailQuery = update(ParkingBayDetail).where(ParkingBayDetail.rowid==parkingBayId).values(parking_bay_status = statusChange)
-            # make a try statement
-            # executeQueryUpdateParkingBayDetail = createConnectionAndExecuteQuery(updateParkingBayDetailQuery)
-            
-            #finally
-            db.session.commit()    
-        elif(statusChange == 1):
-            print("car is entering parking bay")
-            updateParkingBayDetailQuery = ParkingBayDetail.query.filter_by(rowid=parkingBayId).first()
-            updateParkingBayDetailQuery.parking_bay_status = statusChange
-            # updateParkingBayDetailQuery = update(ParkingBayDetail).where(ParkingBayDetail.rowid==parkingBayId).values(parking_bay_status = statusChange)
-            # executeQueryUpdateParkingBayDetail = createConnectionAndExecuteQuery(updateParkingBayDetailQuery)
-            
-            # try if something breaks roll back
-            entry = ParkingBayTimestamp(parking_bay_id = parkingBayId,
-                    parking_bay_entry_time = datetime.now())
-            db.session.add(entry)
-            
-            # except do rollback
-        
-            # finally commit  
-            db.session.commit() 
-        return redirect("/",200)
-    else:
-        return '<h1>you are not allowed to access this page by this method</h1>'
 
 if __name__ == '__main__':
     try:
