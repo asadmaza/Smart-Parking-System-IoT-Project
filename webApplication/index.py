@@ -208,7 +208,11 @@ def statusChangeFromDevice(messagePayload):
         previousState = dataDictionary[i]["prev_state"]
         bayType = dataDictionary[i]["bay_type"]
         isBayBooked = dataDictionary[i]["is_bay_booked"]
-        
+    print(parkingName)
+    print(state)
+    print(previousState)
+    print(bayType)
+    print(isBayBooked)
     getParkingBayDetail = select(ParkingBayDetail).where(ParkingBayDetail.parking_bay_name==parkingName) #change to actual variable from the message payload
     queryResult = createConnectionAndExecuteQuery(getParkingBayDetail)
     for row in queryResult:
