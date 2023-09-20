@@ -117,7 +117,9 @@ def read_distance(TRIG, ECHO):
 # {red_led = GPIO mapping, yellow_or_green_led = GPIO mapping, sensor_trigger =  GPIO map sensor, sensor_echo = GPIO map sensor,
 # bay_state (free = 0, occupied = 1), prev_state, bay_type (reserved or general), is_bay_booked( 0 = No, 1 = yes)
 bay_mapping = {
-    'Bay1': {'red_led': 2, 'yellow_or_green_led': 3, 'sensor_trigger': 17, 'sensor_echo': 23, 'state': 0, 'prev_state': 0, 'bay_type': 'reserved', 'is_bay_booked' : 0}
+    'Bay1': {'red_led': 2, 'yellow_or_green_led': 3, 'sensor_trigger': 17, 'sensor_echo': 23, 'state': 0, 'prev_state': 0, 'bay_type': 'reserved', 'is_bay_booked' : 0},
+    'Bay2': {'red_led': 4, 'yellow_or_green_led': 14, 'sensor_trigger': 27, 'sensor_echo': 24, 'state': 0, 'prev_state': 0, 'bay_type': 'general', 'is_bay_booked' : 0},
+    'Bay3': {'red_led': 15, 'yellow_or_green_led': 18, 'sensor_trigger': 22, 'sensor_echo': 10, 'state': 0, 'prev_state': 0, 'bay_type': 'general', 'is_bay_booked' : 0}
             }
 
 # Initialise interval variables for publish and check bay status
