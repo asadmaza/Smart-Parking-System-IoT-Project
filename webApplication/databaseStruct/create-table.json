@@ -1,0 +1,19 @@
+{
+    "TableName": "parking_bay_detail2",
+    "KeySchema": [
+        {
+            "AttributeName": "parking_bay_name",
+            "KeyType": "HASH"
+        }
+    ],
+    "AttributeDefinitions": [
+        {
+            "AttributeName": "parking_bay_name",
+            "AttributeType": "S"
+        }
+    ],
+    "ProvisionedThroughput": {
+        "ReadCapacityUnits": 5,
+        "WriteCapacityUnits": 5
+    }
+}

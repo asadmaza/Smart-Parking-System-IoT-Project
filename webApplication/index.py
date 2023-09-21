@@ -5,10 +5,12 @@ from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
 from sqlalchemy import select, create_engine, update
 import os
 import json
+import boto3
 from datetime import datetime, date, time
 
 file_path = os.path.abspath(os.getcwd())+"/databaseStruct/mockIoT.db"
 
+dynamo_client = boto3.client('dynamodb')
 db = SQLAlchemy()
 scheduler = APScheduler()
 myMQTTClient = AWSIoTMQTTClient("aji_laptop")
@@ -269,6 +271,42 @@ def giveinitialBayState():
     myMQTTClient.publish(INIT_BAY_STATE, json.dumps(message), 1)  
 
     return redirect("/", 200)
+
+@app.route("/2")
+def homePage2():
+    # Check IP validation, if ip address for admin then show navbar to go to statistics and camera stream
+    arrayOfParkingBay = []
+    totalAvailableParkingBay = 0
+    
+    dynamoDBQuery = dynamo_client.scan(TableName='parking_bay_detail2')
+    for x in dynamoDBQuery['Items']:
+        parkingBayName = ''
+        parkingBayType = 0
+        parkingBayStatus = 0
+        for y in x:
+            if( y == 'parking_bay_name'):
+                parkingBayName = x[y]['S']
+            elif( y == 'parking_bay_type'):
+                parkingBayType = int(x[y]['N'])
+            elif( y == 'parking_bay_status'):
+                parkingBayStatus = int(x[y]['N'])
+        if (parkingBayStatus == 0):
+            totalAvailableParkingBay = totalAvailableParkingBay + 1
+
+        parkingBayData = {
+            'parkingBayName':parkingBayName,
+            'status': parkingBayStatus,
+            'parkingType' : parkingBayType
+        }
+
+        arrayOfParkingBay.append(parkingBayData)
+
+    result = {
+        'availableSpace':totalAvailableParkingBay,
+        'perBay':sorted(arrayOfParkingBay, key=lambda d: d['parkingBayName'])
+    }
+
+    return render_template('homePage.html', result=result)
 
 if __name__ == '__main__':
     try:

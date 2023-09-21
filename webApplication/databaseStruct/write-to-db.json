@@ -1,0 +1,49 @@
+{
+    "parking_bay_detail2": [
+        {
+            "PutRequest": {
+                "Item": {
+                    "parking_bay_name": {
+                        "S": "A1"
+                    },
+                    "parking_bay_status": {
+                        "N": "0"
+                    },
+                    "parking_bay_type": {
+                        "N": "1"
+                    }
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "parking_bay_name": {
+                        "S": "A2"
+                    },
+                    "parking_bay_status": {
+                        "N": "0"
+                    },
+                    "parking_bay_type": {
+                        "N": "1"
+                    }
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "parking_bay_name": {
+                        "S": "A3"
+                    },
+                    "parking_bay_status": {
+                        "N": "0"
+                    },
+                    "parking_bay_type": {
+                        "N": "2"
+                    }
+                }
+            }
+        }
+    ]
+}
