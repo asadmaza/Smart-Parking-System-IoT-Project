@@ -5,7 +5,7 @@ from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
 from sqlalchemy import select, create_engine, update
 import os
 import json
-from datetime import datetime, date
+from datetime import datetime, date, time
 
 file_path = os.path.abspath(os.getcwd())+"/databaseStruct/mockIoT.db"
 
@@ -18,9 +18,10 @@ app.config["SQLALCHEMY_DATABASE_URI"] = 'sqlite:///' + file_path
 # Topic const
 INIT_BAY_STATE = "INIT_BAY_STATE"
 BAY_STATUS_CHANGE_FROM_DEVICE = "BAY_STATUS_CHANGE_FROM_DEVICE"
-FEEDBACK_TO_DEVICE_FROM_CHANGING_STATUS = "FEEDBACK_TO_DEVICE_FROM_CHANGING_STATUS"
-SEND_BAY_CHANGE_STATUS_WHEN_RESERVED = "SEND_BAY_CHANGE_STATUS_WHEN_RESERVED"
-FEEDBACK_FROM_DEVICE_WHEN_BAY_IS_RESERVED = "FEEDBACK_FROM_DEVICE_WHEN_BAY_IS_RESERVED"
+FEEDBACK_TO_DEVICE_FROM_CHANGING_STATUS = "FEEDBACK_TO_DEVICE_FROM_CHANGING_STATUS" # maybe publish to this
+SEND_BAY_CHANGE_STATUS_WHEN_RESERVED = "SEND_BAY_CHANGE_STATUS_WHEN_RESERVED" # publish to this
+SEND_BAY_CHANGE_STATUS_WHEN_RESERVATION_EXPIRED = "SEND_BAY_CHANGE_STATUS_WHEN_RESERVATION_EXPIRED" # publish to this
+FEEDBACK_FROM_DEVICE_WHEN_BAY_IS_RESERVED = "FEEDBACK_FROM_DEVICE_WHEN_BAY_IS_RESERVED" 
 
 # Global Variable for waiting state
 feedbackWaitingControl = False
@@ -31,11 +32,11 @@ def customCallback(client, userdata, message):
         print("Received a bay status change from device : ")
         print(message.payload.decode("utf-8"))
         statusChangeFromDevice(message.payload.decode("utf-8"))
-    if(message.topic == FEEDBACK_FROM_DEVICE_WHEN_BAY_IS_RESERVED):
-        print("Received a feedback message from device : ")
-        print(message.payload.decode("utf-8"))
-        # To-Do -> change the feedbackWaitingControl to True
-    if(message.topic == INIT_BAY_STATE):
+    # if(message.topic == FEEDBACK_FROM_DEVICE_WHEN_BAY_IS_RESERVED):
+    #     print("Received a feedback message from device : ")
+    #     print(message.payload.decode("utf-8"))
+    #     # To-Do -> change the feedbackWaitingControl to True
+    elif(message.topic == INIT_BAY_STATE):
         print("Received a feedback message from device : ")
         print(message.payload.decode("utf-8"))
         giveinitialBayState()
@@ -50,7 +51,7 @@ myMQTTClient.configureCredentials(os.path.abspath(os.getcwd())+"/aws-certif/root
 # Confirm MQTT Connection
 myMQTTClient.connect()
 myMQTTClient.subscribe(BAY_STATUS_CHANGE_FROM_DEVICE, 1, customCallback)
-myMQTTClient.subscribe(FEEDBACK_FROM_DEVICE_WHEN_BAY_IS_RESERVED, 1, customCallback)
+# myMQTTClient.subscribe(FEEDBACK_FROM_DEVICE_WHEN_BAY_IS_RESERVED, 1, customCallback)
 myMQTTClient.subscribe(INIT_BAY_STATE, 1, customCallback)
 
 db.init_app(app)
@@ -90,6 +91,7 @@ class BookingParkingBay(db.Model):
 
 @app.route("/")
 def homePage():
+    # Check IP validation, if ip address for admin then show navbar to go to statistics and camera stream
     arrayOfParkingBay = []
     totalAvailableParkingBay = 0
 
@@ -129,15 +131,16 @@ def bookingForm(parking_bay):
         timeOut = request.form['tOut']
 
         print("a bay is being reserved")
-        # To-Do -> publish message to indicate a parking bay is reserved (To-Do)
-
-        # To-Do -> wait for a feedback from the raspberry pi via subscriber by doing a while loop the condition is in the feedbackWaitingControl in global variable, 
+        bayStatus = {parking_bay:2}
+        timestamp = time.strftime("%Y-%m-%d %H:%M:%S")  # Update timestamp here
+        message = json.dumps({"timestamp": timestamp, "data": bayStatus})
+        myMQTTClient.publish(SEND_BAY_CHANGE_STATUS_WHEN_RESERVED, json.dumps(message), 1)
+        # Maybe not do this as well To-Do -> wait for a feedback from the raspberry pi via subscriber by doing a while loop the condition is in the feedbackWaitingControl in global variable, 
 
         getParkingBayDetail = select(ParkingBayDetail).where(ParkingBayDetail.parking_bay_name==parking_bay)
         queryResult = createConnectionAndExecuteQuery(getParkingBayDetail)
         for row in queryResult:
             parkingBayId = int(row.rowid)
-            parkingName = row.parking_bay_name
         updateParkingBayDetailQuery = ParkingBayDetail.query.filter_by(rowid=parkingBayId).first()
         updateParkingBayDetailQuery.parking_bay_status = 2
         splitTimeIn = timeIn.split(":")
@@ -185,6 +188,11 @@ def resettingExpiredBay():
                 updateExpiredBookingDetail = BookingParkingBay.query.filter_by(rowid=bookingId).first()
                 updateExpiredBookingDetail.is_expired = 1
 
+                bayStatus = {updateExpiredParkingBayDetail.parking_bay_name:0}
+                timestamp = time.strftime("%Y-%m-%d %H:%M:%S")  # Update timestamp here
+                message = json.dumps({"timestamp": timestamp, "data": bayStatus})
+                myMQTTClient.publish(SEND_BAY_CHANGE_STATUS_WHEN_RESERVATION_EXPIRED, json.dumps(message), 1)
+                
                 db.session.commit()
 
     return redirect("/",200)
@@ -258,7 +266,7 @@ def giveinitialBayState():
         bay_states[row.parking_bay_name] = row.parking_bay_status
 
     message = {"bay_states": bay_states}
-    myMQTTClient.publish("INIT_BAY_STATE", json.dumps(message), 1)  
+    myMQTTClient.publish(INIT_BAY_STATE, json.dumps(message), 1)  
 
     return redirect("/", 200)
 
