@@ -8,7 +8,7 @@ from datetime import datetime, date, time
 
 dynamo_client = boto3.client("dynamodb")
 scheduler = APScheduler()
-myMQTTClient = AWSIoTMQTTClient("cits5506EC2")
+myMQTTClient = AWSIoTMQTTClient("aji_laptop")
 app = Flask(__name__)
 
 # Topic const
@@ -33,8 +33,8 @@ def customCallback(client, userdata, message):
 # AWS IoT client setup
 myMQTTClient.configureEndpoint("a30y98prchbi0n-ats.iot.us-west-2.amazonaws.com", 8883)
 myMQTTClient.configureCredentials(os.path.abspath(os.getcwd())+"/aws-certif/root-CA.crt",
-                                      os.path.abspath(os.getcwd())+"/aws-certif/cits5506EC2.private.key",
-                                      os.path.abspath(os.getcwd())+"/aws-certif/cits5506EC2.cert.pem")
+                                      os.path.abspath(os.getcwd())+"/aws-certif/aji_laptop.private.key",
+                                      os.path.abspath(os.getcwd())+"/aws-certif/aji_laptop.cert.pem")
 
 # Confirm MQTT Connection
 myMQTTClient.connect()
@@ -565,7 +565,11 @@ def visualizationDashboard():
 
 @app.route("/cameraFeed")
 def cameraFeedDashBoard():    
-    return redirect("/",200)
+    url = "http://3.106.140.164:8081/"
+    result = {
+        "url":url
+    }
+    return render_template("cameraFeed.html", result=result)
 
 if __name__ == "__main__":
     try:
