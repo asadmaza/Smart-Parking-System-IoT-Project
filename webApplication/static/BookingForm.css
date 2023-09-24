@@ -1,0 +1,264 @@
+.booking-form.root {
+  background-color: rgb(255, 255, 255);
+  display: flex;
+  flex-direction: column;
+  min-height: 625px;
+  overflow: hidden;
+  position: relative;
+}
+.booking-form .flex_col {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  margin: 18px 11px 69px;
+  position: relative;
+  width: 55%;
+  align-items: center;
+}
+@media (min-width: 480px) and (max-width: 99999px) {
+  .booking-form .flex_col {
+    aspect-ratio: auto;
+    margin: 18px auto 69px;
+    width: 55%;
+    align-items: center;
+  }
+}
+.booking-form .medium_title {
+  align-items: center;
+  color: rgb(0, 0, 0);
+  display: flex;
+  font: 700 24px/1.2 "Inter", Helvetica, Arial, serif;
+  justify-content: center;
+  letter-spacing: 0px;
+  margin: 0px 1px 0px 0px;
+  min-height: 70px;
+  text-align: center;
+}
+.booking-form .paragraph {
+  align-items: center;
+  color: rgb(133, 133, 133);
+  display: flex;
+  font: 700 14px/1.21 "Inter", Helvetica, Arial, serif;
+  justify-content: center;
+  letter-spacing: 0px;
+  margin: 23px 0px 0px 1px;
+  min-height: 30px;
+  text-align: center;
+}
+.booking-form .box {
+  background-color: rgb(255, 255, 255);
+  border-radius: 20px 20px 20px 20px;
+  display: flex;
+  filter: drop-shadow(0px 5px 10px rgba(0, 0, 0, 0.247));
+  flex-direction: column;
+  margin: 23px 1px 0px 0px;
+  min-height: 345px;
+  position: relative;
+  align-items: center;
+}
+.booking-form .group {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  margin: 10px 8px 12px 10px;
+  min-height: 400px;
+  position: relative;
+}
+.booking-form .content_box7 {
+  border-radius: 10px 10px 10px 10px;
+  bottom: 293px;
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.247);
+  display: flex;
+  flex-direction: column;
+  left: 0px;
+  margin: 0px auto;
+  position: relative;
+  right: 0px;
+  top: 0px;
+  width: 80%;
+}
+.booking-form .text1 {
+  align-items: center;
+  color: rgb(92, 86, 86);
+  display: flex;
+  flex-grow: 1;
+  font: 600 14px/1.21 "Inter", Helvetica, Arial, serif;
+  justify-content: center;
+  letter-spacing: 2.1px;
+  margin: 2% 28px 13px 27px;
+  text-align: center;
+}
+.booking-form .grid {
+  align-content: center;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  left: 0px;
+  margin: 3% 0px 0px 0px;
+  min-height: 83.5px;
+  position: relative;
+  right: 0px;
+  top: 10%;
+}
+.booking-form .grid > .cell {
+  display: flex;
+  flex: 0 0 calc(100% - 0px);
+  flex-direction: column;
+}
+.booking-form .wrapper {
+  background-color: rgba(0, 0, 0, 0);
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  overflow: hidden;
+  position: relative;
+}
+.booking-form .wrapper1 {
+  flex-grow: 1;
+  height: 49px;
+  margin: 8px 2px;
+  min-height: 49px;
+  object-fit: cover;
+  width: auto;
+}
+.booking-form .grid > .cell1 {
+  display: flex;
+  flex: 0 0 calc(92% - 0px);
+  flex-direction: column;
+}
+.booking-form .subtitle {
+  align-items: center;
+  color: rgb(83, 172, 237);
+  display: flex;
+  flex-grow: 1;
+  font: 600 16px/1.2 "Inter", Helvetica, Arial, serif;
+  justify-content: center;
+  letter-spacing: 3px;
+  text-align: center;
+}
+.booking-form .grid1 {
+  align-content: center;
+  bottom: 0px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  left: 0px;
+  margin: 0px auto;
+  position: relative;
+  right: 0px;
+  width: 70%;
+}
+.booking-form .grid1 > .cell {
+  display: flex;
+  flex: 0 0 calc(100% - 0px);
+  flex-direction: column;
+  margin: 3% 0px 0px 0px;
+  height: 30px
+}
+.booking-form .content_box1 {
+  background-color: rgba(83, 172, 237, 0.749);
+  border-radius: 10px 10px 10px 10px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  position: relative;
+}
+.booking-form .text {
+  align-items: center;
+  color: rgb(255, 255, 255);
+  display: flex;
+  flex-grow: 1;
+  font: 600 14px/1.21 "Inter", Helvetica, Arial, serif;
+  justify-content: center;
+  letter-spacing: 2.1px;
+  margin: 3px 13px 2px 12px;
+  text-align: center;
+}
+.booking-form .desc {
+  align-items: center;
+  color: rgb(106, 120, 255);
+  display: flex;
+  font: 400 12px/1.25 "Inter", Helvetica, Arial, serif;
+  justify-content: center;
+  letter-spacing: 0px;
+  margin: 3% auto auto auto;
+  text-align: center;
+  text-decoration: underline;
+}
+.booking-form .content_box {
+  background-color: rgba(83, 172, 237, 0.898);
+  border-radius: 10px 10px 10px 10px;
+  display: flex;
+  flex-direction: column;
+  margin: 0px 11px 0px 10px;
+  position: relative;
+  width: 100%;
+}
+.booking-form .highlight {
+  align-items: center;
+  color: rgb(255, 255, 255);
+  display: flex;
+  flex-grow: 1;
+  font: 700 15px/1.2 "Inter", Helvetica, Arial, serif;
+  justify-content: center;
+  letter-spacing: 0px;
+  margin: 7px auto 8px;
+  min-height: 25px;
+  text-align: center;
+}
+.fa{
+  align-self: center;
+  font-size: 50px !important; /*size whatever you like*/
+  color: rgba(83, 172, 237, 0.898);
+}
+::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: rgb(255, 255, 255);
+  opacity: 1; /* Firefox */
+}
+:-ms-input-placeholder { /* Internet Explorer 10-11 */
+  color: rgb(255, 255, 255);
+}
+::-ms-input-placeholder { /* Microsoft Edge */
+  color: rgb(255, 255, 255);
+}
+.booking-form .timeInput {
+  background-color: rgba(83, 172, 237, 0.749);
+  border-radius: 10px 10px 10px 10px;
+  color: rgb(255, 255, 255);
+  margin: 3px 13px 2px 12px;
+  text-align: center;
+  font: 600 14px/1.21 "Inter", Helvetica, Arial, serif;
+}
+.booking-form .submitButton {
+  background-color: rgba(0,0,0,0);
+  border-radius: 10px 10px 10px 10px;
+  display: flex;
+  flex-direction: column;
+  margin: 3% 11px 2% 11px;
+  position: relative;
+  width: 80%;
+  align-items: center;
+  border: rgba(0,0,0,0);
+}
+.reserve_park {
+  background-color: rgba(83, 172, 237, 0.749);
+  border-radius: 20px 20px 20px 20px;
+  margin: 5% 11px 2% 10px;
+  position: relative;
+  border-color: rgba(0,0,0,0);
+  width: 65%;
+}
+.toHome{
+  align-items: center;
+  color: rgb(255, 255, 255);
+  display: flex;
+  flex-grow: 1;
+  font: 600 12px/1.25 "Inter", Helvetica, Arial, serif;
+  justify-content: center;
+  letter-spacing: 0px;
+  margin: 7px auto 8px;
+  min-height: 25px;
+  text-align: center;
+  width: 61.76%;
+}
+/*# sourceMappingURL=BookingForm.css.map */

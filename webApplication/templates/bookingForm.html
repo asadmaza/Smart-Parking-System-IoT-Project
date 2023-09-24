@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+  <!--  This source code is exported from pxCode, you can get more document from https://www.pxcode.io  -->
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+      integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/aos@2.3.1/dist/aos.css" />
+
+    <!-- Please DO NOT remove this line, all link and script tags will be merged to here -->
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='BookingForm.css') }}" />
+
+    <script type="text/javascript" src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/sticky-js@1.3.0/dist/sticky.min.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/headroom.js@0.12.0/dist/headroom.min.js"></script>
+  </head>
+
+  <body class="flex-column">
+    <div class="booking-form root">
+      <div class="flex_col">
+        <h2 class="medium_title">Smart Parking <br />System</h2>
+        <form id="submitBooking" method="post" name="bookingForm" action="/bookingForm/"+{{ result.pickedParkingBay }} onsubmit="return validateForm()" required>
+            <div class="box">
+                <div class="group">
+                    <div class="content_box7"><div class="text1">Parking Spot Reservation Form</div></div>
+                    <div class="grid">
+                    <div class="cell">
+                        <div class="wrapper">
+                            <i id="car1" class="fa fa-car wrapper1" alt="alt text"></i>
+                        </div>
+                    </div>
+                    <div class="cell1"><h3 class="subtitle">{{ result.pickedParkingBay }}</h3></div>
+                    </div>
+                    <div class="grid1">
+                    <div class="cell">
+                        <input class="content_box1 text" placeholder="Full Name" name="fname"/>
+                    </div>
+                    <div class="cell">
+                        <input class="content_box1 text" placeholder="Email" name="email"/>
+                    </div>
+                    <div class="cell">
+                        <input type="number" class="content_box1 text" placeholder="Phone Number" name="phnumber"/>
+                    </div>
+                    <div class="cell">
+                        <input class="content_box1 text" placeholder="Plate Number" name="pnumber"/>
+                    </div>
+                    <div class="cell">
+                        <input id="outputTime" type="text" class="timeInput" name="tOut" placeholder="Check-Out Time" onClick="changeTypeOutputTime()">
+                    </div>
+                    </div>
+                </div>
+                <p class="desc">By reserving a parking spot, you agree to our terms and conditions</p>
+                <button class="submitButton" type="submit"><div class="content_box"><h5 class="highlight">Reserve A Parking Spot</h5></div></button>
+            </div>     
+        </form>
+      </div>
+    </div>
+    <script type="text/javascript">
+      AOS.init();
+      new Sticky('.sticky-effect');
+
+      let pickedBayValue = '{{result.pickedParkingBay}}';
+
+      function validateForm() {
+        var fullName = document.forms["bookingForm"]["fname"].value;
+        if (fullName == "") {
+          alert("Name must be filled out");
+          return false;
+        }
+        var email = document.forms["bookingForm"]["email"].value;
+        if (email == "") {
+          alert("Email must be filled out");
+          return false;
+        }
+        var phNumber = document.forms["bookingForm"]["phnumber"].value;
+        if (phNumber == "") {
+          alert("Phone number must be filled out");
+          return false;
+        }
+        var pNumber = document.forms["bookingForm"]["pnumber"].value;
+        if (pNumber == "") {
+          alert("Plate number must be filled out");
+          return false;
+        }
+        
+        var timeOut = document.forms["bookingForm"]["tOut"].value;
+        if (timeOut == "") {
+          alert("Check-out time must be filled out");
+          return false;
+        }
+        //validation timeOut must > timeIn
+        //validation for length of phone number
+        //validation for email
+        var a = document.getElementById('submitBooking');
+        var url = "http://localhost:5000/bookingForm/"+ pickedBayValue;
+        a.setAttribute('action',  url);
+      }
+      function changeTypeInputTime(){
+        document.getElementById('inputTime').type = 'time';
+      }
+      function changeTypeOutputTime(){
+        document.getElementById('outputTime').type = 'time';
+      }
+    </script>
+  </body>
+</html>

@@ -1,3 +1,6 @@
 venv
 webApplication/__pycache__
-webApplication/databaseStruct/mockIoTDB.db
+webApplication/databaseStruct/mockIoT.db
+webApplication/node_modules/jquery
+webApplication/aws-certif/
+webApplication/testScript.py
