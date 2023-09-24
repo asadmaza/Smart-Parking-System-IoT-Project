@@ -1,6 +1,6 @@
 APScheduler==3.10.4
 awscli==1.29.52
-awscrt==0.19.1
+awscrt==0.5.2
 AWSIoTPythonSDK==1.5.2
 awsiotsdk==1.0.2
 backports.zoneinfo==0.2.1

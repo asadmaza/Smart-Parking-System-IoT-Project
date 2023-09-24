@@ -324,4 +324,15 @@
 
 }
 
+.reserved{
+  color: rgb(243, 255, 107) !important;
+}
+
+.sitemap{
+  display: flex;
+  gap: 0px 10%;
+  justify-content: center;
+  font: 700 14px/1.21 "Inter", Helvetica, Arial, serif;
+}
+
 /*# sourceMappingURL=HomePage.css.map */

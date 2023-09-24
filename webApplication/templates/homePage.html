@@ -29,6 +29,11 @@
       <div class="flex_col">
         <h2 class="productTitle">Smart Parking <br />System</h2>
         <div class="wrapper1"><p class="wrapper11">Parking Building Floor Map</p></div>
+        <div class="sitemap">
+          <a class="wrapper11" href={{ url_for('homePage') }} >Parking Floor Map</a>
+          <a class="wrapper11" href={{ url_for('visualizationDashboard') }} >Visualization Dashboard</a>
+          <a class="wrapper11" href={{ url_for('cameraFeedDashBoard') }} >Camera Feed</a>
+        </div>
         <div class="box">
           <div class="flex_col1">
             <div class="wrapper2">
@@ -43,14 +48,14 @@
                       <div class="flex_row1">
                         <div class="wrapper4">
                           {% if result.perBay[0].status == 0 %}
-                            <button id="bookBay1" class="btn" onclick="bookABay1()"><i id="car1" class="fa fa-car wrapper41" alt="alt text"></i></button>
+                            <button id="bookBay1" class="btn" ><i id="car1" class="fa fa-car wrapper41" alt="alt text"></i></button>
                           {% else %}
                             <button id="bookBay1" class="btn"><i id="car1" class="fa fa-car wrapper41 dud" alt="alt text"></i></button>
                           {% endif %}
                         </div>
                         <div class="wrapper4">
                           {% if result.perBay[1].status == 0 %}
-                            <button id="bookBay2" class="btn" onclick="bookABay2()"><i id="car2" class="fa fa-car wrapper41" alt="alt text"></i></button>
+                            <button id="bookBay2" class="btn" ><i id="car2" class="fa fa-car wrapper41" alt="alt text"></i></button>
                           {% else %}
                             <button id="bookBay2" class="btn"><i id="car2" class="fa fa-car wrapper41 dud" alt="alt text"></i></button>
                           {% endif %}
@@ -71,7 +76,7 @@
                       <div class="flex_row1">
                         <div class="wrapper4">
                           {% if result.perBay[2].status == 0 %}
-                            <button id="bookBay3" class="btn" onclick="bookABay3()"><i id="car3" class="fa fa-car wrapper41" alt="alt text"></i></button>
+                            <button id="bookBay3" class="btn" onclick="bookABay3()"><i id="car3" class="fa fa-car wrapper41 reserved" alt="alt text"></i></button>
                           {% else %}
                             <button id="bookBay3" class="btn"><i id="car3" class="fa fa-car wrapper41 dud" alt="alt text"></i></button>
                           {% endif %}
@@ -178,7 +183,7 @@
           </div>
         </div>
         <div class="wrapper">
-          <p class="wrapper5">You can reserve a vacant parking bay by clicking at the green car icon</p>
+          <p class="wrapper5">You can reserve a vacant parking bay by clicking at the yellow car icon</p>
           <a id="continueBooking" class="reserve_park" onClick="bookAParkingBay()" ><h5 class="highlight">Book A Space</h5></a>
         </div>
       </div>
@@ -186,69 +191,13 @@
     <script rel="javascript" type="text/javascript" href="js/jquery-1.11.3.min.js">
       AOS.init();
       new Sticky('.sticky-effect');
-      
-      let stateBay1 = true;
-      let stateBay2 = true;
+
       let stateBay3 = true;
       let pickedBayValue = '';
 
       document.getElementById("continueBooking").style.display = "none";
       document.getElementById("pickABay").style.display = "none";
-      function bookABay1() {
-        if (stateBay1) {
-            document.getElementById("car1").style.color = "#F3FF6B";
-            document.getElementById("continueBooking").style.display = "block";
-
-            document.getElementById("pickABay").innerHTML = 'A1 is picked for reservation';
-            document.getElementById("pickABay").style.display = "block";
-            pickedBayValue = 'A1';
-            
-            
-            document.getElementById("bookBay2").disabled = true;
-            document.getElementById("bookBay3").disabled = true;
-
-            stateBay1 = false;
-        }else{
-            document.getElementById("car1").style.color = "#6BFF84"; 
-            document.getElementById("continueBooking").style.display = "none";
-
-            document.getElementById("pickABay").innerHTML = '';
-            document.getElementById("pickABay").style.display = "none";
-            pickedBayValue = '';
-
-            document.getElementById("bookBay2").disabled = false;
-            document.getElementById("bookBay3").disabled = false;
-
-            stateBay1 = true; 
-        }     
-      }
-      function bookABay2() {
-        if (stateBay2) {
-            document.getElementById("car2").style.color = "#F3FF6B";
-            document.getElementById("continueBooking").style.display = "block";
-
-            document.getElementById("pickABay").innerHTML = 'A2 is picked for reservation';
-            document.getElementById("pickABay").style.display = "block";
-            pickedBayValue = 'A2';
-
-            document.getElementById("bookBay1").disabled = true;
-            document.getElementById("bookBay3").disabled = true;
-
-            stateBay2 = false;
-        }else{
-            document.getElementById("car2").style.color = "#6BFF84";  
-            document.getElementById("continueBooking").style.display = "none";
-
-            document.getElementById("pickABay").innerHTML = '';
-            document.getElementById("pickABay").style.display = "none";
-            pickedBayValue = '';
-
-            document.getElementById("bookBay1").disabled = false;
-            document.getElementById("bookBay3").disabled = false;
-
-            stateBay2 = true;
-        }    
-      }
+      
       function bookABay3() {
         if (stateBay3) {
             document.getElementById("car3").style.color = "#F3FF6B";
@@ -258,9 +207,6 @@
             document.getElementById("pickABay").style.display = "block";
             pickedBayValue = 'A3';
 
-            document.getElementById("bookBay1").disabled = true;
-            document.getElementById("bookBay2").disabled = true;
-
             stateBay3 = false;
         }else{
             document.getElementById("car3").style.color = "#6BFF84"; 
@@ -269,9 +215,6 @@
             document.getElementById("pickABay").innerHTML = '';
             document.getElementById("pickABay").style.display = "none";
             pickedBayValue = '';
-
-            document.getElementById("bookBay1").disabled = false;
-            document.getElementById("bookBay2").disabled = false;
 
             stateBay3 = true; 
         }    
