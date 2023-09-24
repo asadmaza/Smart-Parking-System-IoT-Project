@@ -8,7 +8,7 @@ from datetime import datetime, date, time
 
 dynamo_client = boto3.client("dynamodb")
 scheduler = APScheduler()
-myMQTTClient = AWSIoTMQTTClient("aji_laptop")
+myMQTTClient = AWSIoTMQTTClient("cits5506EC2")
 app = Flask(__name__)
 
 # Topic const
@@ -33,8 +33,8 @@ def customCallback(client, userdata, message):
 # AWS IoT client setup
 myMQTTClient.configureEndpoint("a30y98prchbi0n-ats.iot.us-west-2.amazonaws.com", 8883)
 myMQTTClient.configureCredentials(os.path.abspath(os.getcwd())+"/aws-certif/root-CA.crt",
-                                      os.path.abspath(os.getcwd())+"/aws-certif/aji_laptop.private.key",
-                                      os.path.abspath(os.getcwd())+"/aws-certif/aji_laptop.cert.pem")
+                                      os.path.abspath(os.getcwd())+"/aws-certif/cits5506EC2.private.key",
+                                      os.path.abspath(os.getcwd())+"/aws-certif/cits5506EC2.cert.pem")
 
 # Confirm MQTT Connection
 myMQTTClient.connect()
