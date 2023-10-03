@@ -221,7 +221,7 @@
       }
       function bookAParkingBay(){
         var a = document.getElementById('continueBooking');
-        var url = "http://0.0.0.0:5000/bookingForm/"+pickedBayValue;
+        var url = "/bookingForm/"+pickedBayValue;
         console.log(url);
         a.setAttribute('href',  url);
       }

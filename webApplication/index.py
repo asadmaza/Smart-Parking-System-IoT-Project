@@ -17,7 +17,6 @@ BAY_STATUS_CHANGE_FROM_DEVICE = "BAY_STATUS_CHANGE_FROM_DEVICE"
 FEEDBACK_TO_DEVICE_FROM_CHANGING_STATUS = "FEEDBACK_TO_DEVICE_FROM_CHANGING_STATUS" # maybe publish to this
 SEND_BAY_CHANGE_STATUS_WHEN_RESERVED = "SEND_BAY_CHANGE_STATUS_WHEN_RESERVED" # publish to this
 SEND_BAY_CHANGE_STATUS_WHEN_RESERVATION_EXPIRED = "SEND_BAY_CHANGE_STATUS_WHEN_RESERVATION_EXPIRED" # publish to this
-FEEDBACK_FROM_DEVICE_WHEN_BAY_IS_RESERVED = "FEEDBACK_FROM_DEVICE_WHEN_BAY_IS_RESERVED" 
 
 # Global Variable for waiting state
 feedbackWaitingControl = False
@@ -561,7 +560,7 @@ def statusChangeFromDevice(messagePayload):
 
 @app.route("/visualization")
 def visualizationDashboard():
-    return redirect("/",200)
+    return render_template("analyticsDashboard.html")
 
 @app.route("/cameraFeed")
 def cameraFeedDashBoard():    
