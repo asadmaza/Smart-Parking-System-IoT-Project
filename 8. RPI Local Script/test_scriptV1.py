@@ -130,7 +130,7 @@ SEND_BAY_CHANGE_STATUS_WHEN_RESERVED = "SEND_BAY_CHANGE_STATUS_WHEN_RESERVED" # 
 SEND_BAY_CHANGE_STATUS_WHEN_RESERVATION_EXPIRED = "SEND_BAY_CHANGE_STATUS_WHEN_RESERVATION_EXPIRED" # subscribe to this
 
 # AWS IoT client setup
-myMQTTClient = AWSIoTMQTTClient("aji_laptop")
+myMQTTClient = AWSIoTMQTTClient("testCertif")
 myMQTTClient.configureEndpoint("a30y98prchbi0n-ats.iot.us-west-2.amazonaws.com", 8883)
 myMQTTClient.configureCredentials(os.path.abspath(os.getcwd())+"/testCertif/root-CA.crt",
                                       os.path.abspath(os.getcwd())+"/testCertif/testCertif.private.key",
