@@ -125,7 +125,6 @@ logging.basicConfig(level=logging.DEBUG)
 all_pins_to_off()
 
 # Topic Constant
-INIT_BAY_STATE = "INIT_BAY_STATE" # publish to this
 BAY_STATUS_CHANGE_FROM_DEVICE = "BAY_STATUS_CHANGE_FROM_DEVICE" # publish to this
 SEND_BAY_CHANGE_STATUS_WHEN_RESERVED = "SEND_BAY_CHANGE_STATUS_WHEN_RESERVED" # subscribe to this
 SEND_BAY_CHANGE_STATUS_WHEN_RESERVATION_EXPIRED = "SEND_BAY_CHANGE_STATUS_WHEN_RESERVATION_EXPIRED" # subscribe to this
@@ -284,8 +283,14 @@ try:
                 last_publish_time = current_time
                 state_changed = False  # Reset state flag
                 initial_publish = False  # Reset initial_publish flag
+                bayStatus = {"state":info['state']}
+                result = {
+                    bay : bayStatus
+                }
+                message = json.dumps({"timestamp": timestamp, "data": result})
+                print(message)
                 try:
-                    myMQTTClient.publish(BAY_STATUS_CHANGE_FROM_DEVICE, json.dumps({"timestamp": timestamp, "data": bay_mapping[bay]}), 1)
+                    myMQTTClient.publish(BAY_STATUS_CHANGE_FROM_DEVICE, message, 1)
                 except Exception as e:
                     print(f"An exception occurred while publishing: {e}")
 
