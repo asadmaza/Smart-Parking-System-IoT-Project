@@ -109,20 +109,20 @@ CAN BE DAMAGED IF INCORRECTLY WIRED.
 ====================================================================
 """
 # Imports
-import RPi.GPIO as GPIO
+# import RPi.GPIO as GPIO
 import time
 import json
 import os
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
-import Adafruit_CharLCD as LCD
-from gpio_reset import all_pins_to_off
+# import Adafruit_CharLCD as LCD
+# from gpio_reset import all_pins_to_off
 import logging
 
 # Connection debugging
 logging.basicConfig(level=logging.DEBUG)
 
 # Set all pins to off before main code
-all_pins_to_off()
+# all_pins_to_off()
 
 # Topic Constant
 BAY_STATUS_CHANGE_FROM_DEVICE = "BAY_STATUS_CHANGE_FROM_DEVICE" # publish to this
@@ -132,16 +132,16 @@ SEND_BAY_CHANGE_STATUS_WHEN_RESERVATION_EXPIRED = "SEND_BAY_CHANGE_STATUS_WHEN_R
 # AWS IoT client setup
 myMQTTClient = AWSIoTMQTTClient("aji_laptop")
 myMQTTClient.configureEndpoint("a30y98prchbi0n-ats.iot.us-west-2.amazonaws.com", 8883)
-myMQTTClient.configureCredentials(os.path.abspath(os.getcwd())+"/aws-certif/root-CA.crt",
-                                      os.path.abspath(os.getcwd())+"/aws-certif/aji_laptop.private.key",
-                                      os.path.abspath(os.getcwd())+"/aws-certif/aji_laptop.cert.pem")
+myMQTTClient.configureCredentials(os.path.abspath(os.getcwd())+"/testCertif/root-CA.crt",
+                                      os.path.abspath(os.getcwd())+"/testCertif/testCertif.private.key",
+                                      os.path.abspath(os.getcwd())+"/testCertif/testCertif.cert.pem")
 
 # Confirm MQTT Connection
 myMQTTClient.connect()
 
 # GPIO config
-GPIO.setmode(GPIO.BCM)
-GPIO.setwarnings(False)
+# GPIO.setmode(GPIO.BCM)
+# GPIO.setwarnings(False)
 
 # Setup GPIOs for LCD
 lcd_rs        = 25
@@ -155,11 +155,11 @@ lcd_columns   = 16
 lcd_rows      = 2
 
 # Initialise LCD object
-lcd = LCD.Adafruit_CharLCD(
-    lcd_rs, lcd_en, lcd_d4, lcd_d5, lcd_d6, lcd_d7,
-    lcd_columns, lcd_rows, lcd_backlight)
+# lcd = LCD.Adafruit_CharLCD(
+#     lcd_rs, lcd_en, lcd_d4, lcd_d5, lcd_d6, lcd_d7,
+#     lcd_columns, lcd_rows, lcd_backlight)
 # Set cursor blinks off
-lcd.blink(False)
+# lcd.blink(False)
 
 
 # LED, sensor, state and type mapping for each bay
@@ -187,7 +187,8 @@ def customCallback(client, userdata, message):
         print("Received a reservation expiry from flask : ")
         getAReservationExpiryFromFlask(message.payload.decode("utf-8"))
 
-myMQTTClient.subscribe(BAY_STATUS_CHANGE_FROM_DEVICE, 1, customCallback)
+myMQTTClient.subscribe(SEND_BAY_CHANGE_STATUS_WHEN_RESERVED, 1, customCallback)
+myMQTTClient.subscribe(SEND_BAY_CHANGE_STATUS_WHEN_RESERVATION_EXPIRED, 1, customCallback)
 
 def getAReservationFromFlask(messagePayload):
     json_object = json.loads(messagePayload)
@@ -197,8 +198,8 @@ def getAReservationFromFlask(messagePayload):
     global available_bays
     available_bays -= 1
     bay_mapping[parkingName]["state"] = 1
-    GPIO.output(info['yellow_or_green_led'], False)
-    GPIO.output(info['red_led'], True)
+    # GPIO.output(info['yellow_or_green_led'], False)
+    # GPIO.output(info['red_led'], True)
 
 def getAReservationExpiryFromFlask(messagePayload):
     json_object = json.loads(messagePayload)
@@ -208,41 +209,41 @@ def getAReservationExpiryFromFlask(messagePayload):
     global available_bays
     available_bays += 1
     bay_mapping[parkingName]["state"] = 0
-    GPIO.output(info['yellow_or_green_led'], True)
-    GPIO.output(info['red_led'], False)
+    # GPIO.output(info['yellow_or_green_led'], True)
+    # GPIO.output(info['red_led'], False)
 
 # Define distance measuring function
-def read_distance(TRIG, ECHO):
-    GPIO.output(TRIG, False)
-    time.sleep(1.5)    
-    GPIO.output(TRIG, True)
-    time.sleep(0.00001)
-    GPIO.output(TRIG, False)    
-    while GPIO.input(ECHO)==0:
-        pulse_start = time.time()
-    while GPIO.input(ECHO)==1:
-        pulse_end = time.time()
-    pulse_duration = pulse_end - pulse_start
-    distance = (pulse_duration * 34300) / 2
-    distance = round(distance, 2)
-    return distance
+# def read_distance(TRIG, ECHO):
+#     GPIO.output(TRIG, False)
+#     time.sleep(1.5)    
+#     GPIO.output(TRIG, True)
+#     time.sleep(0.00001)
+#     GPIO.output(TRIG, False)    
+#     while GPIO.input(ECHO)==0:
+#         pulse_start = time.time()
+#     while GPIO.input(ECHO)==1:
+#         pulse_end = time.time()
+#     pulse_duration = pulse_end - pulse_start
+#     distance = (pulse_duration * 34300) / 2
+#     distance = round(distance, 2)
+#     return distance
 
 # Setup GPIO for LEDs
-for bay, info in bay_mapping.items():
-    GPIO.setup(info['yellow_or_green_led'], GPIO.OUT)
-    GPIO.setup(info['red_led'], GPIO.OUT)
-    GPIO.setup(info['sensor_trigger'], GPIO.OUT)
-    GPIO.setup(info['sensor_echo'], GPIO.IN)
+# for bay, info in bay_mapping.items():
+#     GPIO.setup(info['yellow_or_green_led'], GPIO.OUT)
+#     GPIO.setup(info['red_led'], GPIO.OUT)
+#     GPIO.setup(info['sensor_trigger'], GPIO.OUT)
+#     GPIO.setup(info['sensor_echo'], GPIO.IN)
 
 # Initialise state and max and min bays
-lcd.clear()
+# lcd.clear()
 available_bays = 0
 max_bays = 3
 min_bays = 0
-lcd.message("""Initialising
-System""")
-for bay,  info in bay_mapping.items():
-    GPIO.output(info['yellow_or_green_led'], True)
+# lcd.message("""Initialising
+# System""")
+# for bay,  info in bay_mapping.items():
+#     GPIO.output(info['yellow_or_green_led'], True)
 
 # main loop
 try:
@@ -251,60 +252,61 @@ try:
     state_changed = False  # Flag to indicate whether state has changed
     available_bays = 0  # Reset the count of available bays 
     while True:
-        current_time = time.time()       
-        for bay, info in bay_mapping.items():
-            # Read distance from ultrasonic sensor
-            dist_measured = read_distance(info['sensor_trigger'], info['sensor_echo'])
-            # Check toy car presence
-            # 5cm threshold for toy car
-            if dist_measured <= 5.0 and dist_measured >= 0.0:
-                # Turn off yellow/green LED and turn on red LED
-                GPIO.output(info['yellow_or_green_led'], False)
-                GPIO.output(info['red_led'], True)
-                # Update available bays
-                if info['state'] == 0:
-                    info['state'] = 1
+        print("")
+        # current_time = time.time()       
+        # for bay, info in bay_mapping.items():
+        #     # Read distance from ultrasonic sensor
+        #     dist_measured = read_distance(info['sensor_trigger'], info['sensor_echo'])
+        #     # Check toy car presence
+        #     # 5cm threshold for toy car
+        #     if dist_measured <= 5.0 and dist_measured >= 0.0:
+        #         # Turn off yellow/green LED and turn on red LED
+        #         GPIO.output(info['yellow_or_green_led'], False)
+        #         GPIO.output(info['red_led'], True)
+        #         # Update available bays
+        #         if info['state'] == 0:
+        #             info['state'] = 1
             
-            if dist_measured > 5.0:
-                # Turn on yellow/green LED and turn off red LED
-                GPIO.output(info['yellow_or_green_led'], True)
-                GPIO.output(info['red_led'], False)
-                # Update available bays
-                if info['state'] == 1:
-                    info['state'] = 0
+        #     if dist_measured > 5.0:
+        #         # Turn on yellow/green LED and turn off red LED
+        #         GPIO.output(info['yellow_or_green_led'], True)
+        #         GPIO.output(info['red_led'], False)
+        #         # Update available bays
+        #         if info['state'] == 1:
+        #             info['state'] = 0
             
-            # Update available bays based on state
-            if info['state'] == 0:
-                available_bays += 1
-            # Print for testing purposes
-            print(f"{bay} Distance: {dist_measured} State: {info['state']}")
-            if (state_changed or initial_publish) and current_time - last_publish_time >= publish_bay_mapping_interval:
-                timestamp = time.strftime("%Y-%m-%d %H:%M:%S")  # Update timestamp here
-                last_publish_time = current_time
-                state_changed = False  # Reset state flag
-                initial_publish = False  # Reset initial_publish flag
-                bayStatus = {"state":info['state']}
-                result = {
-                    bay : bayStatus
-                }
-                message = json.dumps({"timestamp": timestamp, "data": result})
-                print(message)
-                try:
-                    myMQTTClient.publish(BAY_STATUS_CHANGE_FROM_DEVICE, message, 1)
-                except Exception as e:
-                    print(f"An exception occurred while publishing: {e}")
+        #     # Update available bays based on state
+        #     if info['state'] == 0:
+        #         available_bays += 1
+        #     # Print for testing purposes
+        #     print(f"{bay} Distance: {dist_measured} State: {info['state']}")
+        #     if (state_changed or initial_publish) and current_time - last_publish_time >= publish_bay_mapping_interval:
+        #         timestamp = time.strftime("%Y-%m-%d %H:%M:%S")  # Update timestamp here
+        #         last_publish_time = current_time
+        #         state_changed = False  # Reset state flag
+        #         initial_publish = False  # Reset initial_publish flag
+        #         bayStatus = {"state":info['state']}
+        #         result = {
+        #             bay : bayStatus
+        #         }
+        #         message = json.dumps({"timestamp": timestamp, "data": result})
+        #         print(message)
+        #         try:
+        #             myMQTTClient.publish(BAY_STATUS_CHANGE_FROM_DEVICE, message, 1)
+        #         except Exception as e:
+        #             print(f"An exception occurred while publishing: {e}")
 
-        lcd.clear()
-        lcd.message(f"Available bays:{available_bays}")
-        print("-"*80)
-        print("To stop script correctly, press CTRL + C, ensure all_pins_to_off() function runs")
+        # lcd.clear()
+        # lcd.message(f"Available bays:{available_bays}")
+        # print("-"*80)
+        # print("To stop script correctly, press CTRL + C, ensure all_pins_to_off() function runs")
 
 # Break out
 except KeyboardInterrupt:
     print("Terminating module")
-    lcd.clear()
-    all_pins_to_off()
+    # lcd.clear()
+    # all_pins_to_off()
     
 # Cleanup
-finally:
-    all_pins_to_off()
+# finally:
+#     all_pins_to_off()
