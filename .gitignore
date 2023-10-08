@@ -4,3 +4,4 @@ webApplication/databaseStruct/mockIoT.db
 webApplication/node_modules/jquery
 webApplication/aws-certif/
 webApplication/testScript.py
+webApplication/credentials.json
