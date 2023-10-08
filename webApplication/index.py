@@ -1,14 +1,18 @@
 from flask import Flask, render_template, request, redirect
 from flask_apscheduler import APScheduler
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
+from botocore.exceptions import ClientError
 import os
 import json
 import boto3
 from datetime import datetime, date, time
 
 dynamo_client = boto3.client("dynamodb")
+sts = boto3.client('sts')
+# client = boto3.client('cognito-identity')
+client = boto3.client('quicksight')
 scheduler = APScheduler()
-myMQTTClient = AWSIoTMQTTClient("cits5506EC2")
+myMQTTClient = AWSIoTMQTTClient("aji_laptop")
 app = Flask(__name__)
 
 # Topic const
@@ -32,8 +36,8 @@ def customCallback(client, userdata, message):
 # AWS IoT client setup
 myMQTTClient.configureEndpoint("a30y98prchbi0n-ats.iot.us-west-2.amazonaws.com", 8883)
 myMQTTClient.configureCredentials(os.path.abspath(os.getcwd())+"/aws-certif/root-CA.crt",
-                                      os.path.abspath(os.getcwd())+"/aws-certif/cits5506EC2.private.key",
-                                      os.path.abspath(os.getcwd())+"/aws-certif/cits5506EC2.cert.pem")
+                                      os.path.abspath(os.getcwd())+"/aws-certif/aji_laptop.private.key",
+                                      os.path.abspath(os.getcwd())+"/aws-certif/aji_laptop.cert.pem")
 
 # Confirm MQTT Connection
 myMQTTClient.connect()
@@ -558,16 +562,66 @@ def statusChangeFromDevice(messagePayload):
 
         return redirect("/",200)
 
+def getEmbeddingURL(accountId, dashboardId, userArn, allowedDomains, roleArn, sessionName):
+        try:
+            assumedRole = sts.assume_role(
+                RoleArn = roleArn,
+                RoleSessionName = sessionName
+            )
+        except ClientError as e:
+            return "Error assuming role: " + str(e)
+        else: 
+            assumedRoleSession = boto3.Session(
+                aws_access_key_id = assumedRole['Credentials']['AccessKeyId'],
+                aws_secret_access_key = assumedRole['Credentials']['SecretAccessKey'],
+                aws_session_token = assumedRole['Credentials']['SessionToken'],
+            )
+            try:
+                quickSightClient = assumedRoleSession.client('quicksight', region_name='us-west-2')
+                response = quickSightClient.generate_embed_url_for_registered_user(
+                    AwsAccountId = accountId,
+                    ExperienceConfiguration = {
+                        "Dashboard" : {
+                            "InitialDashboardId" : dashboardId
+                        }
+                    },
+                    UserArn = userArn,
+                    AllowedDomains = [
+                        allowedDomains
+                    ],
+                    SessionLifetimeInMinutes = 600
+                )
+                
+                return {
+                    'statusCode': 200,
+                    'headers': {"Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "Content-Type"},
+                    'body': json.dumps(response),
+                    'isBase64Encoded':  bool('false')
+                }
+            except ClientError as e:
+                return "Error generating embedding url: " + str(e)
+
 @app.route("/visualization")
 def visualizationDashboard():
-    return render_template("analyticsDashboard.html")
+    f = open('credentials.json')
+    data = json.load(f)
+    response = getEmbeddingURL(data["AccountID"], data["DashboardID"], data["UserArn"], data["AllowedDomains"], data["RoleArn"], data["SessionName"])
+    f.close()
+    json_object = json.loads(response['body'])
+    result = {
+        "dashboardEmbedURL" : json_object['EmbedUrl']
+    }
+    return render_template("analyticsDashboard.html", result=result)
 
 @app.route("/cameraFeed")
-def cameraFeedDashBoard():    
-    url = "http://3.106.140.164:8081/"
+def cameraFeedDashBoard():
+    f = open('credentials.json')
+    data = json.load(f)    
+    url = data["CameraFeedLink"]
     result = {
         "url":url
     }
+    f.close()    
     return render_template("cameraFeed.html", result=result)
 
 if __name__ == "__main__":
