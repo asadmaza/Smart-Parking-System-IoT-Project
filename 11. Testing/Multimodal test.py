@@ -1,7 +1,7 @@
 """
-Ultrasonic Sensor testing file to measure the accuracy and the
-detection of a car in the bay. We will use this file to test a toy
-car and a real car.
+Sensor testing file to measure the accuracy and the detection of
+a car in the bay. We will use this file to test a toy car and a
+real car.
 
 Components required:
 x1 Raspberry Pi Kit (RPI, cables, power source, breadboard etc.)
@@ -11,8 +11,8 @@ x2 330 ohm resistors
 x1 Ultrasonic Sensor
 
 Code description:
-File to test the ultrasonic sensor measurement accuracy, prints out
-value when the code is run:
+File to test the measurement accuracy, prints out value when the
+code is run:
 - Distance measured when bay is occupied
 - Distance measured when bay is free
 - % Accuracy with actual (ground truth) measured using measuring
