@@ -24,14 +24,14 @@ ultrasonic sensor and 2 LEDs.
 
 Ensure the Ultrasonic sensor is connected as described:
 • VCC connects to Pin 2 (5V)
-• Trig connects to Pin 11 (GPIO 17)
+• Trig connects to GPIO Pin 8
 • Echo connects to R1 (1k OHM)
 • R2 and R3 (1k OHM + 1 k OHM) connects from R1 to Ground
-• Wire from R1 and R2+R3 connects to Pin 16 (GPIO 23)
+• Wire from R1 and R2+R3 connects to GPIO Pin 7
 • GND connects to Pin 34 (Ground)
 
-LED(GPIO 2) - Green LED
-LED(GPIO 3) - Red LED
+LED(GPIO 5) - Green LED
+LED(GPIO 6) - Red LED
 --------------------------------------------------------------------
 
 Date: 10/10/2023
@@ -65,8 +65,8 @@ GPIO.setwarnings(False)
 
 # Mapping bay information
 bay_mapping = {
-    'Bay1': {'red_led': 2, 'yellow_or_green_led': 3,
-             'sensor_trigger': 17, 'sensor_echo': 23,
+    'Bay1': {'red_led': 5, 'yellow_or_green_led': 6,
+             'sensor_trigger': 8, 'sensor_echo': 7,
              'state': 0, 'prev_state': 0,
              'bay_type': 'reserved', 'is_bay_booked' : 0}
     }
@@ -117,7 +117,8 @@ try:
                 
                 print(f"{bay} Distance: {dist_measured} Bay State: {info['state']}")
                 continue_loop = "No"
-                continue_loop = input("Do you require another reading? -Please reply with Yes")      
+                continue_loop = input("Do you require another reading? -Please reply with Yes")
+                
 except KeyboardInterrupt:
     print("Terminating and cleaning up")
     all_pins_to_off()
