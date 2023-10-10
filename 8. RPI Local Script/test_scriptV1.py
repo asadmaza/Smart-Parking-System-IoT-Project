@@ -190,11 +190,17 @@ def customCallback(client, userdata, message):
 myMQTTClient.subscribe(SEND_BAY_CHANGE_STATUS_WHEN_RESERVED, 1, customCallback)
 myMQTTClient.subscribe(SEND_BAY_CHANGE_STATUS_WHEN_RESERVATION_EXPIRED, 1, customCallback)
 
+def getDataFromJsonString(jsonString):
+    commaSplit = jsonString.split(',')
+    onlyData = commaSplit[1].replace('{', '')
+    onlyData = onlyData.replace('}', '')
+    onlyData = onlyData.split(':')
+    parkingName = onlyData[1].replace('"','').strip()
+    return parkingName
+
 def getAReservationFromFlask(messagePayload):
     json_object = json.loads(messagePayload)
-    dataDictionary = json_object["data"]
-    for i in dataDictionary:
-            parkingName = i
+    parkingName = getDataFromJsonString(json_object)
     global available_bays
     available_bays -= 1
     bay_mapping[parkingName]["state"] = 1
@@ -203,9 +209,7 @@ def getAReservationFromFlask(messagePayload):
 
 def getAReservationExpiryFromFlask(messagePayload):
     json_object = json.loads(messagePayload)
-    dataDictionary = json_object["data"]
-    for i in dataDictionary:
-            parkingName = i
+    parkingName = getDataFromJsonString(json_object)
     global available_bays
     available_bays += 1
     bay_mapping[parkingName]["state"] = 0
