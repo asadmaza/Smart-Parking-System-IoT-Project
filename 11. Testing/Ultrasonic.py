@@ -62,6 +62,12 @@ def read_distance(TRIG, ECHO):
 # GPIO config
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
+GPIO.setup(5, GPIO.OUT)
+GPIO.setup(6, GPIO.OUT)
+GPIO.setup(8, GPIO.OUT)
+GPIO.setup(7, GPIO.IN)
+green_LED = GPIO.output(6, GPIO.LOW)
+red_LED = GPIO.output(5, GPIO.HIGH)
 
 # Mapping bay information
 bay_mapping = {
@@ -76,7 +82,7 @@ check_bay_status_interval = 0.5  # Queries bay status every (1.5 + 0.5) seconds
 last_publish_time = time.time()
 last_check_time = time.time()
 
-threshold_max = 5.0 # in cm
+threshold_max = 15.0 # in cm
 threshold_min = 0.0 # in cm
 
 # initalise continue_loop to Yes
@@ -86,7 +92,7 @@ try:
     initial_publish = True # Flag to force initial publish
     state_changed = False  # Flag to indicate whether state has changed
     
-    while continual_loop = "Yes":
+    while continue_loop == "Yes":
         current_time = time.time()
         
         # Check status of each bay if enough time has elapsed since the last check
@@ -107,13 +113,18 @@ try:
                     if info['state'] == 0:
                         info['state'] = 1
                         state_changed = True  # State has changed
-                
+                        green_LED = GPIO.output(6, GPIO.HIGH)
+                        red_LED = GPIO.output(5, GPIO.LOW)
+                        
                 elif dist_measured > threshold_max:
                     GPIO.output(info['yellow_or_green_led'], True)
                     GPIO.output(info['red_led'], False)
                     if info['state'] == 1:
                         info['state'] = 0
                         state_changed = True  # State has changed
+                        green_LED = GPIO.output(6, GPIO.LOW)
+                        red_LED = GPIO.output(5, GPIO.HIGH)
+                
                 
                 print(f"{bay} Distance: {dist_measured} Bay State: {info['state']}")
                 continue_loop = "No"

@@ -24,8 +24,9 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 
 # Initialise the LEDs
+GPIO.setup([6,5], GPIO.OUT)
 green_LED = GPIO.output(6, GPIO.LOW)
-red_LED = GPIO.outpu(5, GPIO.HIGH)
+red_LED = GPIO.output(5, GPIO.HIGH)
 
 def get_average(data_list):
     return sum(data_list) / len(data_list)
@@ -59,18 +60,18 @@ try:
     while True:
         raw_data = magSensor.read()
         z_axis_strength = raw_data['z']
-        print("observation value : "+ default_value)
+        print("observation value : "+ str(default_value))
         if abs((z_axis_strength - default_value) / default_value) > sensor_threshold:
-            print("magnetometer difference :"+(z_axis_strength - default_value) / default_value)
+            print("magnetometer difference :"+ str((z_axis_strength - default_value) / default_value))
             print("detected car")
             # Change LED status
             green_LED = GPIO.output(6, GPIO.HIGH)
-            red_LED = GPIO.outpu(5, GPIO.LOW)
+            red_LED = GPIO.output(5, GPIO.LOW)
         else:
             print("no car")
             # change LED status
             green_LED = GPIO.output(6, GPIO.LOW)
-            red_LED = GPIO.outpu(5, GPIO.HIGH)
+            red_LED = GPIO.output(5, GPIO.HIGH)
         sleep_ms(1000)
 except KeyboardInterrupt:
     print("\nProgram terminated.")
