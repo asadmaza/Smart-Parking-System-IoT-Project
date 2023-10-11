@@ -1,9 +1,9 @@
 """
-Multimodal OR Sensor testing file to measure the accuracy and the
+Multimodal Sensor AND testing file to measure the accuracy and the
 detection of a car in the bay. We will use this file to test a toy
 car and a real car.
 
-This is an OR test - if both sensors detect a car in the bay,
+This is an AND test - if both sensors detect a car in the bay,
 the LED will turn from Green (free) to Red (occupied)
 
 Components required:
@@ -95,9 +95,9 @@ threshold_min = 0.0 # in cm
 continue_loop = "Yes"
 
 # Initialise threshold value
-sensor_threshold = 0.10 # in percent (e.g. 10% = 0.10)
+sensor_threshold = 0.015 # in percent (e.g. 10% = 0.10)
 
-base_val_threshold = 0.02 # in percent (e.g. 2% = 0.02)
+base_val_threshold = 0.005 # in percent (e.g. 2% = 0.02)
 # Initialise sensor
 magSensor = PiicoDev_QMC6310(range=3000)
 def get_average(data_list):
@@ -112,6 +112,8 @@ def collect_data_for_seconds(seconds):
         sleep_ms(1000)
     return data_list
 
+print("Ultrasonic and Magnetometer sensor mounted at top of bay")
+print("Formula for change_in_magnetfic_flux_density: abs((z_axis_strength - default_value) / default_value) * 100%")
 
 # Loop until a valid default value is obtained
 while True:
@@ -128,7 +130,6 @@ while True:
         default_value = avg_value
         break
 
-print("Average default value for magnetosensor:", default_value)
 
 try:
     initial_publish = True # Flag to force initial publish
@@ -137,7 +138,10 @@ try:
     while continue_loop == "Yes":
         current_time = time.time()
         raw_data = magSensor.read()
-        z_axis_strength = raw_data['z']                    
+        z_axis_strength = raw_data['z']
+        print("observation value : "+ str(default_value))
+        print("change in magnetic flux density : ", abs((z_axis_strength - default_value) / default_value)*100)
+
         # Check status of each bay if enough time has elapsed since the last check
         if current_time - last_check_time >= check_bay_status_interval:
             last_check_time = current_time
@@ -148,59 +152,37 @@ try:
                 dist_measured = read_distance(info['sensor_trigger'], info['sensor_echo'])
                 # Remember previous state
                 info['prev_state'] = info['state']
-                # if ultrasonic detects something
-                if dist_measured <= threshold_max and dist_measured >= threshold_min :
-                    # if magnetometer detects something
-                    print("ultrasonic sensor is detecting something dist_measured: " + str(dist_measured) + " bay status is occupied")
-                    if abs((z_axis_strength - default_value) / default_value) > sensor_threshold:
-                        print("magnetometer is detecting something  bay status is occupied ")
-                        print("magnetometer difference :"+ str((z_axis_strength - default_value) / default_value))
-                        print("Z-axis strength:", z_axis_strength)
-                        print("detected car")
-                        if info['state'] == 0:
-                            info['state'] = 1
-                            state_changed = True  # State has changed
-                            green_LED = GPIO.output(5, GPIO.LOW)
-                            red_LED = GPIO.output(6, GPIO.HIGH)
-                    # if not
-                    else:
-                        print("magnetometer is not detecting anything bay status is still occupied ")
-                        print("magnetometer difference :"+ str((z_axis_strength - default_value) / default_value))
-                        print("Z-axis strength:", z_axis_strength)
-                        print("detected car")
-                        if info['state'] == 0:
-                            info['state'] = 1
-                            state_changed = True  # State has changed
-                            green_LED = GPIO.output(5, GPIO.LOW)
-                            red_LED = GPIO.output(6, GPIO.HIGH)
-                # if not
+                
+                # Check toy car presence based on Ultrasonic sensor distance measurement and Magnetometer conditional
+                if (dist_measured <= threshold_max and dist_measured >= threshold_min) and (abs((z_axis_strength - default_value) / default_value) > sensor_threshold):
+                    print("magnetometer difference :"+ str((z_axis_strength - default_value) / default_value))
+                    print("Z-axis strength:", z_axis_strength)
+                    print("detected car")
+                    print("")
+                    print(f"{bay} Distance: {dist_measured} Bay State: {info['state']}")
+                    print("magnetometer and ultrasonic are detecting something and bay status is occupied")
+                    if info['state'] == 0:
+                        info['state'] = 1
+                        state_changed = True  # State has changed
+                        green_LED = GPIO.output(5, GPIO.LOW)
+                        red_LED = GPIO.output(6, GPIO.HIGH)
+                        
                 else:
-                    # if magnetometer detects something
-                    print("ultrasonic sensor is not detecting anything dist_measured: " + str(dist_measured) + " bay status not occupied")
-                    if abs((z_axis_strength - default_value) / default_value) > sensor_threshold:
-                        print("magnetometer is detecting something bay status is occupied ")
-                        print("magnetometer difference :"+ str((z_axis_strength - default_value) / default_value))
-                        print("Z-axis strength:", z_axis_strength)
-                        print("detected car")
-                        if info['state'] == 0:
-                            info['state'] = 1
-                            state_changed = True  # State has changed
-                            green_LED = GPIO.output(5, GPIO.LOW)
-                            red_LED = GPIO.output(6, GPIO.HIGH)
-                    # if not
-                    else:
-                        print("magnetometer is not detecting anything bay status is not occupied ")
-                        print("magnetometer difference :"+ str((z_axis_strength - default_value) / default_value))
-                        print("Z-axis strength:", z_axis_strength)
-                        print("no car")
-                        if info['state'] == 1:
-                            info['state'] = 0
-                            state_changed = True  # State has changed
-                            green_LED = GPIO.output(5, GPIO.HIGH)
-                            red_LED = GPIO.output(6, GPIO.LOW)
+                    print("magnetometer difference :"+ str((z_axis_strength - default_value) / default_value))
+                    print("Z-axis strength:", z_axis_strength)
+                    print("no car")
+                    print("")
+                    print(f"{bay} Distance: {dist_measured} Bay State: {info['state']}")
+                    print("magnetometer and/or ultrasonic are not detecting something and bay status is free")
+                    if info['state'] == 1:
+                        info['state'] = 0
+                        state_changed = True  # State has changed
+                        green_LED = GPIO.output(5, GPIO.HIGH)
+                        red_LED = GPIO.output(6, GPIO.LOW)
                         
                 
                 
+                print("-" * 50)
                 continue_loop = "No"
                 continue_loop = input("Do you require another reading? -Please reply with Yes")
                 
