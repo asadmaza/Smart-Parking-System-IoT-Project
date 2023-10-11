@@ -53,9 +53,6 @@
                         <input class="content_box1 text" placeholder="Plate Number" name="pnumber"/>
                     </div>
                     <div class="cell">
-                      <input id="inputTime" type="text" class="timeInput" name="tIn" placeholder="Check-In Time" onClick="changeTypeInputTime()">
-                    </div>
-                    <div class="cell">
                         <input id="outputTime" type="text" class="timeInput" name="tOut" placeholder="Check-Out Time" onClick="changeTypeOutputTime()">
                     </div>
                     </div>
@@ -91,11 +88,6 @@
         var pNumber = document.forms["bookingForm"]["pnumber"].value;
         if (pNumber == "") {
           alert("Plate number must be filled out");
-          return false;
-        }
-        var timeIn = document.forms["bookingForm"]["tIn"].value;
-        if (timeIn == "") {
-          alert("Check-in time must be filled out");
           return false;
         }
         var timeOut = document.forms["bookingForm"]["tOut"].value;
