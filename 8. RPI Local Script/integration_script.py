@@ -166,7 +166,7 @@ lcd.blink(False)
 
 # LED, sensor, state and type mapping for each bay
 bay_mapping = {
-    'A1': {'red_led': 5, 'yellow_or_green_led': 6, 'sensor_trigger': 8, 'sensor_echo': 7, 'state': 0, 'prev_state': 0, 'bay_type': 1, 'is_bay_booked' : 0},
+    'A1': {'red_led': 6, 'yellow_or_green_led': 5, 'sensor_trigger': 8, 'sensor_echo': 7, 'state': 0, 'prev_state': 0, 'bay_type': 1, 'is_bay_booked' : 0},
     'A3': {'red_led': 27, 'yellow_or_green_led': 17, 'blue_led':10, 'sensor_trigger': 0, 'sensor_echo': 1,'state': 0, 'prev_state': 0, 'bay_type': 2, 'is_bay_booked' : 0}
 }
 
@@ -251,6 +251,8 @@ for bay, info in bay_mapping.items():
     GPIO.setup(info['red_led'], GPIO.OUT)
     GPIO.setup(info['sensor_trigger'], GPIO.OUT)
     GPIO.setup(info['sensor_echo'], GPIO.IN)
+
+GPIO.setup(bay_mapping['A3']['blue_led'])
 
 # Initialise state and max and min bays
 lcd.clear()
