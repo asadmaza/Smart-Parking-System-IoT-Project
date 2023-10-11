@@ -149,12 +149,12 @@ GPIO.setwarnings(False)
 lcd_rs        = 25
 lcd_en        = 9
 lcd_d4        = 11
-lcd_d5        = 5
-lcd_d6        = 6
+lcd_d5        = 21
+lcd_d6        = 20
 lcd_d7        = 13
 lcd_backlight = 4
 lcd_columns   = 16
-lcd_rows      = 2
+lcd_rows      = 26
 
 # Initialise LCD object
 lcd = LCD.Adafruit_CharLCD(
@@ -167,7 +167,7 @@ lcd.blink(False)
 # LED, sensor, state and type mapping for each bay
 bay_mapping = {
     'A1': {'red_led': 5, 'yellow_or_green_led': 6, 'sensor_trigger': 8, 'sensor_echo': 7, 'state': 0, 'prev_state': 0, 'bay_type': 1, 'is_bay_booked' : 0},
-    'A3': {'red_led': 15, 'yellow_or_green_led': 18, 'sensor_trigger': 22, 'sensor_echo': 10,'state': 0, 'prev_state': 0, 'bay_type': 2, 'is_bay_booked' : 0}
+    'A3': {'red_led': 27, 'yellow_or_green_led': 17, 'blue_led':10, 'sensor_trigger': 0, 'sensor_echo': 1,'state': 0, 'prev_state': 0, 'bay_type': 2, 'is_bay_booked' : 0}
 }
 
 # Initialise interval variables for publish and check bay status
