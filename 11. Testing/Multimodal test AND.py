@@ -78,7 +78,7 @@ red_LED = GPIO.output(5, GPIO.HIGH)
 # Mapping bay information
 bay_mapping = {
     'Bay1': {'red_led': 5, 'yellow_or_green_led': 6,
-             'sensor_trigger': 8, 'sensor_echo': 7, 'shared_state' = 0
+             'sensor_trigger': 8, 'sensor_echo': 7, 'shared_state' : 0,
              'state': 0, 'prev_state': 0,
              'bay_type': 'reserved', 'is_bay_booked' : 0}
     }

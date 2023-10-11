@@ -78,7 +78,7 @@ red_LED = GPIO.output(5, GPIO.HIGH)
 # Mapping bay information
 bay_mapping = {
     'Bay1': {'red_led': 5, 'yellow_or_green_led': 6,
-             'sensor_trigger': 8, 'sensor_echo': 7, 'shared_state' = 0
+             'sensor_trigger': 8, 'sensor_echo': 7, 'shared_state' : 0,
              'state': 0, 'prev_state': 0,
              'bay_type': 'reserved', 'is_bay_booked' : 0}
     }
@@ -88,16 +88,16 @@ check_bay_status_interval = 0.5  # Queries bay status every (1.5 + 0.5) seconds
 last_publish_time = time.time()
 last_check_time = time.time()
 
-threshold_max = 20.0 # in cm
+threshold_max = 200.0 # in cm
 threshold_min = 0.0 # in cm
 
 # initalise continue_loop to Yes
 continue_loop = "Yes"
 
 # Initialise threshold value
-sensor_threshold = 0.10 # in percent (e.g. 10% = 0.10)
+sensor_threshold = 0.001 # in percent (e.g. 10% = 0.10)
 
-base_val_threshold = 0.02 # in percent (e.g. 2% = 0.02)
+base_val_threshold = 0.008 # in percent (e.g. 2% = 0.02)
 # Initialise sensor
 magSensor = PiicoDev_QMC6310(range=3000)
 def get_average(data_list):
@@ -148,30 +148,57 @@ try:
                 dist_measured = read_distance(info['sensor_trigger'], info['sensor_echo'])
                 # Remember previous state
                 info['prev_state'] = info['state']
-                
-                # Check toy car presence based on Ultrasonic sensor distance measurement and Magnetometer conditional
-                if dist_measured <= threshold_max and dist_measured >= threshold_min or abs((z_axis_strength - default_value) / default_value) > sensor_threshold:
-                    GPIO.output(info['yellow_or_green_led'], False)
-                    GPIO.output(info['red_led'], True)
-                    print("magnetometer difference :"+ str((z_axis_strength - default_value) / default_value))
-                    print("Z-axis strength:", z_axis_strength)
-                    print("detected car")
-                    if info['state'] == 0:
-                        info['state'] = 1
-                        state_changed = True  # State has changed
-                        green_LED = GPIO.output(6, GPIO.HIGH)
-                        red_LED = GPIO.output(5, GPIO.LOW)
+                # if ultrasonic detects something
+                if dist_measured <= threshold_max and dist_measured >= threshold_min :
+                    # if magnetometer detects something
+                    if abs((z_axis_strength - default_value) / default_value) > sensor_threshold:
+                        GPIO.output(info['yellow_or_green_led'], False)
+                        GPIO.output(info['red_led'], True)
+                        print("magnetometer difference :"+ str((z_axis_strength - default_value) / default_value))
+                        print("Z-axis strength:", z_axis_strength)
+                        print("detected car")
+                        if info['state'] == 0:
+                            info['state'] = 1
+                            state_changed = True  # State has changed
+                            green_LED = GPIO.output(6, GPIO.HIGH)
+                            red_LED = GPIO.output(5, GPIO.LOW)
+                    # if not
+                    else:
+                        GPIO.output(info['yellow_or_green_led'], False)
+                        GPIO.output(info['red_led'], True)
+                        print("magnetometer difference :"+ str((z_axis_strength - default_value) / default_value))
+                        print("Z-axis strength:", z_axis_strength)
+                        print("detected car")
+                        if info['state'] == 0:
+                            info['state'] = 1
+                            state_changed = True  # State has changed
+                            green_LED = GPIO.output(6, GPIO.HIGH)
+                            red_LED = GPIO.output(5, GPIO.LOW)
+                # if not
+                else:
+                    # if magnetometer detects something
+                    if abs((z_axis_strength - default_value) / default_value) > sensor_threshold:
+                        GPIO.output(info['yellow_or_green_led'], False)
+                        GPIO.output(info['red_led'], True)
+                        print("magnetometer difference :"+ str((z_axis_strength - default_value) / default_value))
+                        print("Z-axis strength:", z_axis_strength)
+                        print("detected car")
+                        if info['state'] == 0:
+                            info['state'] = 1
+                            state_changed = True  # State has changed
+                            green_LED = GPIO.output(6, GPIO.HIGH)
+                            red_LED = GPIO.output(5, GPIO.LOW)
+                    # if not
+                    else:
+                        GPIO.output(info['yellow_or_green_led'], True)
+                        GPIO.output(info['red_led'], False)
+                        print("no car")
                         
-                elif dist_measured > threshold_max or abs((z_axis_strength - default_value) / default_value) < sensor_threshold:
-                    GPIO.output(info['yellow_or_green_led'], True)
-                    GPIO.output(info['red_led'], False)
-                    print("no car")
-                    
-                    if info['state'] == 1:
-                        info['state'] = 0
-                        state_changed = True  # State has changed
-                        green_LED = GPIO.output(6, GPIO.LOW)
-                        red_LED = GPIO.output(5, GPIO.HIGH)
+                        if info['state'] == 1:
+                            info['state'] = 0
+                            state_changed = True  # State has changed
+                            green_LED = GPIO.output(6, GPIO.LOW)
+                            red_LED = GPIO.output(5, GPIO.HIGH)
                         
                 
                 print(f"{bay} Distance: {dist_measured} Bay State: {info['state']}")
