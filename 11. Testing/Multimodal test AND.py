@@ -72,8 +72,8 @@ GPIO.setup(5, GPIO.OUT)
 GPIO.setup(6, GPIO.OUT)
 GPIO.setup(8, GPIO.OUT)
 GPIO.setup(7, GPIO.IN)
-green_LED = GPIO.output(6, GPIO.LOW)
-red_LED = GPIO.output(5, GPIO.HIGH)
+green_LED = GPIO.output(6, GPIO.HIGH)
+red_LED = GPIO.output(5, GPIO.LOW)
 
 # Mapping bay information
 bay_mapping = {
@@ -88,16 +88,16 @@ check_bay_status_interval = 0.5  # Queries bay status every (1.5 + 0.5) seconds
 last_publish_time = time.time()
 last_check_time = time.time()
 
-threshold_max = 20.0 # in cm
+threshold_max = 200.0 # in cm
 threshold_min = 0.0 # in cm
 
 # initalise continue_loop to Yes
 continue_loop = "Yes"
 
 # Initialise threshold value
-sensor_threshold = 0.10 # in percent (e.g. 10% = 0.10)
+sensor_threshold = 0.01 # in percent (e.g. 10% = 0.10)
 
-base_val_threshold = 0.02 # in percent (e.g. 2% = 0.02)
+base_val_threshold = 0.008 # in percent (e.g. 2% = 0.02)
 # Initialise sensor
 magSensor = PiicoDev_QMC6310(range=3000)
 def get_average(data_list):
@@ -112,6 +112,8 @@ def collect_data_for_seconds(seconds):
         sleep_ms(1000)
     return data_list
 
+print("Ultrasonic and Magnetometer sensor mounted at top of bay")
+print("Formula for change_in_magnetfic_flux_density: abs((z_axis_strength - default_value) / default_value) * 100%")
 
 # Loop until a valid default value is obtained
 while True:
@@ -128,7 +130,6 @@ while True:
         default_value = avg_value
         break
 
-print("Average default value for magnetosensor:", default_value)
 
 try:
     initial_publish = True # Flag to force initial publish
@@ -137,7 +138,10 @@ try:
     while continue_loop == "Yes":
         current_time = time.time()
         raw_data = magSensor.read()
-        z_axis_strength = raw_data['z']                    
+        z_axis_strength = raw_data['z']
+        print("observation value : "+ str(default_value))
+        print("change in magnetic flux density : ", abs((z_axis_strength - default_value) / default_value)*100)
+
         # Check status of each bay if enough time has elapsed since the last check
         if current_time - last_check_time >= check_bay_status_interval:
             last_check_time = current_time
@@ -150,31 +154,31 @@ try:
                 info['prev_state'] = info['state']
                 
                 # Check toy car presence based on Ultrasonic sensor distance measurement and Magnetometer conditional
-                if dist_measured <= threshold_max and dist_measured >= threshold_min and abs((z_axis_strength - default_value) / default_value) > sensor_threshold:
-                    GPIO.output(info['yellow_or_green_led'], False)
-                    GPIO.output(info['red_led'], True)
+                if (dist_measured <= threshold_max and dist_measured >= threshold_min) and (abs((z_axis_strength - default_value) / default_value) > sensor_threshold):
                     print("magnetometer difference :"+ str((z_axis_strength - default_value) / default_value))
                     print("Z-axis strength:", z_axis_strength)
                     print("detected car")
+                    print("")
                     if info['state'] == 0:
                         info['state'] = 1
-                        state_changed = True  # State has changed
-                        green_LED = GPIO.output(6, GPIO.HIGH)
-                        red_LED = GPIO.output(5, GPIO.LOW)
-                        
-                elif dist_measured > threshold_max and abs((z_axis_strength - default_value) / default_value) < sensor_threshold:
-                    GPIO.output(info['yellow_or_green_led'], True)
-                    GPIO.output(info['red_led'], False)
-                    print("no car")
-                    
-                    if info['state'] == 1:
-                        info['state'] = 0
                         state_changed = True  # State has changed
                         green_LED = GPIO.output(6, GPIO.LOW)
                         red_LED = GPIO.output(5, GPIO.HIGH)
                         
+                else:
+                    print("magnetometer difference :"+ str((z_axis_strength - default_value) / default_value))
+                    print("Z-axis strength:", z_axis_strength)
+                    print("no car")
+                    print("")
+                    if info['state'] == 1:
+                        info['state'] = 0
+                        state_changed = True  # State has changed
+                        green_LED = GPIO.output(6, GPIO.HIGH)
+                        red_LED = GPIO.output(5, GPIO.LOW)
+                        
                 
                 print(f"{bay} Distance: {dist_measured} Bay State: {info['state']}")
+                print("-" * 50)
                 continue_loop = "No"
                 continue_loop = input("Do you require another reading? -Please reply with Yes")
                 
