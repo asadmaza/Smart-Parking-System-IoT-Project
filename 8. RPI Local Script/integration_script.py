@@ -252,7 +252,7 @@ for bay, info in bay_mapping.items():
     GPIO.setup(info['sensor_trigger'], GPIO.OUT)
     GPIO.setup(info['sensor_echo'], GPIO.IN)
 
-GPIO.setup(bay_mapping['A3']['blue_led'])
+GPIO.setup(bay_mapping['A3']['blue_led'], GPIO.OUT)
 
 # Initialise state and max and min bays
 lcd.clear()
