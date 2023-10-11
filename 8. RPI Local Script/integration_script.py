@@ -204,7 +204,7 @@ def getAReservationFromFlask(messagePayload):
     parkingName = getDataFromJsonString(json_object)
     global available_bays
     available_bays -= 1
-    bay_mapping[parkingName]["state"] = 1
+    bay_mapping[parkingName]["is_bay_booked"] = 1
     GPIO.output(info['yellow_or_green_led'], False)
     GPIO.output(info['red_led'], True)
 
@@ -213,7 +213,7 @@ def getAReservationExpiryFromFlask(messagePayload):
     parkingName = getDataFromJsonString(json_object)
     global available_bays
     available_bays += 1
-    bay_mapping[parkingName]["state"] = 0
+    bay_mapping[parkingName]["is_bay_booked"] = 0
     GPIO.output(info['yellow_or_green_led'], True)
     GPIO.output(info['red_led'], False)
 
