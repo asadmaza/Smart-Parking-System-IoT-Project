@@ -151,9 +151,11 @@ try:
                 # if ultrasonic detects something
                 if dist_measured <= threshold_max and dist_measured >= threshold_min :
                     # if magnetometer detects something
+                    print("ultrasonic sensor is detecting something dist_measured: " + str(dist_measured) + " bay status is occupied")
                     if abs((z_axis_strength - default_value) / default_value) > sensor_threshold:
                         GPIO.output(info['yellow_or_green_led'], False)
                         GPIO.output(info['red_led'], True)
+                        print("magnetometer is detecting something  bay status is occupied ")
                         print("magnetometer difference :"+ str((z_axis_strength - default_value) / default_value))
                         print("Z-axis strength:", z_axis_strength)
                         print("detected car")
@@ -166,6 +168,7 @@ try:
                     else:
                         GPIO.output(info['yellow_or_green_led'], False)
                         GPIO.output(info['red_led'], True)
+                        print("magnetometer is not detecting anything bay status is still occupied ")
                         print("magnetometer difference :"+ str((z_axis_strength - default_value) / default_value))
                         print("Z-axis strength:", z_axis_strength)
                         print("detected car")
@@ -177,9 +180,11 @@ try:
                 # if not
                 else:
                     # if magnetometer detects something
+                    print("ultrasonic sensor is not detecting anything dist_measured: " + str(dist_measured) + " bay status not occupied")
                     if abs((z_axis_strength - default_value) / default_value) > sensor_threshold:
                         GPIO.output(info['yellow_or_green_led'], False)
                         GPIO.output(info['red_led'], True)
+                        print("magnetometer is detecting something bay status is occupied ")
                         print("magnetometer difference :"+ str((z_axis_strength - default_value) / default_value))
                         print("Z-axis strength:", z_axis_strength)
                         print("detected car")
@@ -192,8 +197,10 @@ try:
                     else:
                         GPIO.output(info['yellow_or_green_led'], True)
                         GPIO.output(info['red_led'], False)
+                        print("magnetometer is not detecting anything bay status is not occupied ")
+                        print("magnetometer difference :"+ str((z_axis_strength - default_value) / default_value))
+                        print("Z-axis strength:", z_axis_strength)
                         print("no car")
-                        
                         if info['state'] == 1:
                             info['state'] = 0
                             state_changed = True  # State has changed
