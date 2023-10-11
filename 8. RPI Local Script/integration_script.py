@@ -154,7 +154,7 @@ lcd_d6        = 20
 lcd_d7        = 13
 lcd_backlight = 4
 lcd_columns   = 16
-lcd_rows      = 26
+lcd_rows      = 2
 
 # Initialise LCD object
 lcd = LCD.Adafruit_CharLCD(
