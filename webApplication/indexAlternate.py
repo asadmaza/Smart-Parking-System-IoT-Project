@@ -29,9 +29,6 @@ def customCallback(client, userdata, message):
     if(message.topic == BAY_STATUS_CHANGE_FROM_DEVICE):
         print("Received a bay status change from device : ")
         statusChangeFromDevice(message.payload.decode("utf-8"))
-    elif(message.topic == INIT_BAY_STATE):
-        print("Received a feedback message from device : ")
-        giveinitialBayState()
 
 # AWS IoT client setup
 myMQTTClient.configureEndpoint("a30y98prchbi0n-ats.iot.us-west-2.amazonaws.com", 8883)
@@ -49,41 +46,6 @@ scheduler.init_app(app)
 scheduler.start()
 
 trusted_proxies = ('127.0.0.1')
-
-def giveinitialBayState():
-    # To-Do -> implement this function
-    # query and get all the parking bay detail
-    # publish to the raspberry pi
-    arrayOfParkingBay = []
-
-    dynamoDBQuery = dynamo_client.scan(TableName="parking_bay_detail2")
-    # need to check if the request success or not
-    for x in dynamoDBQuery["Items"]:
-        parkingBayName = ""
-        parkingBayType = 0
-        parkingBayStatus = 0
-        for y in x:
-            if( y == "parking_bay_name"):
-                parkingBayName = x[y]["S"]
-            elif( y == "parking_bay_type"):
-                parkingBayType = int(x[y]["N"])
-            elif( y == "parking_bay_status"):
-                parkingBayStatus = int(x[y]["N"])
-
-        parkingBayData = {
-            "parkingBayName":parkingBayName,
-            "status": parkingBayStatus,
-            "parkingType" : parkingBayType
-        }
-
-        arrayOfParkingBay.append(parkingBayData)
-
-    result = {
-        "message":sorted(arrayOfParkingBay, key=lambda d: d["parkingBayName"])
-    }
-    myMQTTClient.publish(INIT_BAY_STATE, json.dumps(result), 1)  
-
-    return redirect("/", 200)
 
 @app.route("/")
 def homePage():
@@ -409,6 +371,12 @@ def statusChangeFromDevice(messagePayload):
                             "N": str(statusChange)
                         },
                         "Action": "PUT"
+                    },
+                    "is_bay_booked": {
+                        "Value": {
+                            "N": "0"
+                        },
+                        "Action": "PUT"
                     }
                 },
             )
@@ -497,6 +465,52 @@ def statusChangeFromDevice(messagePayload):
                 # need to check if the request success or not        
             elif(parkingBayType == 2 and isBayBooked == 0): # illegal entry
                 print("entering a reserved bay without any reservation")
+                responsePutLog = dynamo_client.put_item(
+                    TableName="parking_bay_log",
+                    Item={
+                        "UUID" : {
+                            "S": str(timeStampDateObject)
+                        },
+                        "parking_bay_name": {
+                            "S": parkingName
+                        },
+                        "parking_bay_entry_time": {
+                            "S": str(timeStampDateObject)
+                        },
+                        "parking_bay_exit_time": {
+                            "S": ""
+                        },
+                        "parking_bay_total_minutes": {
+                            "N": "0"
+                        },
+                        "customer_full_name": {
+                            "S": ""
+                        },
+                        "customer_email": {
+                            "S": ""
+                        },
+                        "customer_phone_number": {
+                            "S": ""
+                        },
+                        "customer_plate_number": {
+                            "S": ""
+                        },
+                        "booking_entry_time": {
+                            "S": ""
+                        },
+                        "booking_exit_time": {
+                            "S": ""
+                        },
+                        "is_booking_expired": {
+                            "N": "1"
+                        },
+                        "is_bay_booked": {
+                            "N": "0"
+                        },
+                    }
+                )
+                # need to check if the request success or not
+                print(responsePutLog)
             elif(parkingBayType == 1):
                 print("entering a normal bay")
                 # put a new item
