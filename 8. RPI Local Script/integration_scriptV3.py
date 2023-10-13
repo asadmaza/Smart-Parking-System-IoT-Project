@@ -368,13 +368,8 @@ try:
                 # Update available bays based on state
                 if info['state'] == 0 and available_bays < max_bays:
                     available_bays += 1
-                if info['state'] == 1 and available_bays > min_bays:
-                    available_bays -= 1
                 if info['is_bay_booked'] == 0:
                     available_bays +=1
-                if info['is_bay_booked'] == 1:
-                    available_bays -=1
-
 
             lcd.clear()
             lcd.message(f"Available bays:{available_bays}")
