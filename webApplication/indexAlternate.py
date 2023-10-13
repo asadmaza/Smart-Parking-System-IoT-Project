@@ -403,7 +403,10 @@ def statusChangeFromDevice(messagePayload):
                             "N": str(totalMinutes)
                         },
                         "Action": "PUT"
-                    }
+                    },
+                    "is_booking_expired": {
+                        "N": "1"
+                    },
                 },
             )
 
