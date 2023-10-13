@@ -405,7 +405,10 @@ def statusChangeFromDevice(messagePayload):
                         "Action": "PUT"
                     },
                     "is_booking_expired": {
-                        "N": "1"
+                        "Value": {
+                            "N": "1"
+                        },
+                        "Action": "PUT"
                     },
                 },
             )
