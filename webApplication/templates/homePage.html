@@ -54,18 +54,14 @@
                           {% endif %}
                         </div>
                         <div class="wrapper4">
-                          {% if result.perBay[1].status == 0 %}
-                            <button id="bookBay2" class="btn" ><i id="car2" class="fa fa-car wrapper41" alt="alt text"></i></button>
-                          {% else %}
-                            <button id="bookBay2" class="btn"><i id="car2" class="fa fa-car wrapper41 dud" alt="alt text"></i></button>
-                          {% endif %}
+                          <button class="btn"><i class="fa fa-car wrapper41 dud" alt="alt text"></i></button>
                         </div>
                       </div>
                     </div>
                     <div class="cell1">
                       <div class="flex_row2">
                         <div class="info">{{ result.perBay[0].parkingBayName }}</div>
-                        <div class="info">{{ result.perBay[1].parkingBayName }}</div>
+                        <div class="info">A2</div>
                       </div>
                     </div>
                   </div>
@@ -75,10 +71,14 @@
                     <div class="cell2">
                       <div class="flex_row1">
                         <div class="wrapper4">
-                          {% if result.perBay[2].status == 0 %}
+                          {% if result.perBay[2].status == 0 and result.perBay[2].isBayBooked == 0 %} 
                             <button id="bookBay3" class="btn" onclick="bookABay3()"><i id="car3" class="fa fa-car wrapper41 reserved" alt="alt text"></i></button>
-                          {% else %}
-                            <button id="bookBay3" class="btn"><i id="car3" class="fa fa-car wrapper41 dud" alt="alt text"></i></button>
+                          {% elif result.perBay[2].status == 1 and result.perBay[2].isBayBooked == 0 %}
+                            <button id="bookBay3" class="btn"><i id="car3" class="fa fa-car wrapper41 towAway" alt="alt text"></i></button>
+                          {% elif result.perBay[2].status == 0 and result.perBay[2].isBayBooked == 1 %} 
+                            <button id="bookBay3" class="btn"><i id="car3" class="fa fa-car wrapper41 alreadyReserved" alt="alt text"></i></button>
+                          {% elif result.perBay[2].status == 1 and result.perBay[2].isBayBooked == 1  %}
+                            <button id="bookBay3" class="btn"><i id="car3" class="fa fa-car wrapper41 properlyOccupied" alt="alt text"></i></button>
                           {% endif %}
                         </div>
                         <div class="wrapper4">

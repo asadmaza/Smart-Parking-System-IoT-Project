@@ -297,6 +297,18 @@
   color: rgb(255,95,95) !important;
 }
 
+.towAway{
+  color: rgb(0,0,0) !important;
+}
+
+.alreadyReserved{
+  color: rgb(255, 145, 0) !important;
+}
+
+.properlyOccupied{
+  color: rgb(255, 0, 170) !important;
+}
+
 .reserve_park {
   background-color: rgba(83, 172, 237, 0.749);
   border-radius: 20px 20px 20px 20px;

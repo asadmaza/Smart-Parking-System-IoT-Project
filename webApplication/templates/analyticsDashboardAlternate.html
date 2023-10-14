@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <!--  This source code is exported from pxCode, you can get more document from https://www.pxcode.io  -->
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+      integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/aos@2.3.1/dist/aos.css" />
+
+    <!-- Please DO NOT remove this line, all link and script tags will be merged to here -->
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='HomePage.css') }}" />
+
+    <script type="text/javascript" src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/sticky-js@1.3.0/dist/sticky.min.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/headroom.js@0.12.0/dist/headroom.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script src="https://unpkg.com/amazon-quicksight-embedding-sdk@2.0.0/dist/quicksight-embedding-js-sdk.min.js"></script>
+    <script type="text/javascript">
+        const embedDashboard = async() => {
+            const {
+                createEmbeddingContext,
+            } = QuickSightEmbedding;
+
+            const embeddingContext = await createEmbeddingContext({});
+
+            const frameOptions = {
+                url: '{{ result.dashboardEmbedURL }}',
+                container: '#experience-container',
+                height: "700px",
+                width: "1000px",
+            };
+
+            const embeddedDashboardExperience = await embeddingContext.embedDashboard(frameOptions);
+        };
+    </script>
+  </head>
+
+  <body class="flex-column" onload="embedDashboard()">
+    <div class="home-page root">
+      <div class="flex_col">
+        <h2 class="productTitle">Smart Parking <br />System</h2>
+        <div class="wrapper1"><p class="wrapper11">Link Visualization Dashboard</p></div>
+        <div class="sitemap">
+          <a class="wrapper11" href={{ url_for('homePage') }} >Parking Floor Map</a>
+          <a class="wrapper11" href={{ url_for('visualizationDashboard') }} >Visualization Dashboard</a>
+          <a class="wrapper11" href={{ url_for('cameraFeedDashBoard') }} >Camera Feed</a>
+        </div>
+        <div id="experience-container"></div>
+      </div>
+    </div>
+  </body>
+</html>
