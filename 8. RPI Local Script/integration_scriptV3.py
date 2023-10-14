@@ -209,8 +209,8 @@ lcd.blink(False)
 
 # LED, sensor, state and type mapping for each bay
 bay_mapping = {
-    'A1': {'red_led': 6, 'yellow_or_green_led': 5, 'sensor_trigger': 8, 'sensor_echo': 7, 'state': 0, 'prev_state': 0, 'bay_type': 1, 'is_bay_booked' : 0},
-    'A3': {'red_led': 27, 'yellow_or_green_led': 17, 'blue_led':10, 'sensor_trigger': 0, 'sensor_echo': 1,'state': 0, 'prev_state': 0, 'bay_type': 2, 'is_bay_booked' : 0}
+    'A1': {'red_led': 6, 'yellow_or_green_led': 5, 'sensor_trigger': 0, 'sensor_echo': 1, 'state': 0, 'prev_state': 0, 'bay_type': 1, 'is_bay_booked' : 0},
+    'A3': {'red_led': 27, 'yellow_or_green_led': 17, 'blue_led':10, 'sensor_trigger': 8, 'sensor_echo': 7,'state': 0, 'prev_state': 0, 'bay_type': 2, 'is_bay_booked' : 0}
 }
 
 # Initialise interval variables for publish and check bay status
@@ -246,15 +246,15 @@ def getAReservationFromFlask(messagePayload):
     json_object = json.loads(messagePayload)
     parkingName = getDataFromJsonString(json_object)
     bay_mapping[parkingName]["is_bay_booked"] = 1
-    GPIO.output(info['yellow_or_green_led'], False)
-    GPIO.output(info['red_led'], True)
+    # GPIO.output(info['yellow_or_green_led'], False)
+    # GPIO.output(info['red_led'], True)
 
 def getAReservationExpiryFromFlask(messagePayload):
     json_object = json.loads(messagePayload)
     parkingName = getDataFromJsonString(json_object)
     bay_mapping[parkingName]["is_bay_booked"] = 0
-    GPIO.output(info['yellow_or_green_led'], True)
-    GPIO.output(info['red_led'], False)
+    # GPIO.output(info['yellow_or_green_led'], True)
+    # GPIO.output(info['red_led'], False)
 
 # Define distance measuring function
 def read_distance(TRIG, ECHO):
@@ -279,7 +279,7 @@ for bay, info in bay_mapping.items():
     GPIO.setup(info['sensor_trigger'], GPIO.OUT)
     GPIO.setup(info['sensor_echo'], GPIO.IN)
 
-# GPIO.setup(bay_mapping['A3']['blue_led'], GPIO.OUT)
+GPIO.setup(bay_mapping['A3']['blue_led'], GPIO.OUT)
 
 # Initialise state and max and min bays
 lcd.clear()
@@ -336,8 +336,6 @@ try:
                     print("detected car")
                     if info['state'] == 0:
                         info['state'] = 1
-                        GPIO.output(info['yellow_or_green_led'], False)
-                        GPIO.output(info['red_led'], True)
                         bayStatus = {"state":info['state']}
                         result = {
                             bay : bayStatus
@@ -353,8 +351,7 @@ try:
                     
                     if info['state'] == 1:
                         info['state'] = 0
-                        GPIO.output(info['yellow_or_green_led'], True)
-                        GPIO.output(info['red_led'], False)
+                        info['is_bay_booked'] = 0
                         bayStatus = {"state":info['state']}
                         result = {
                             bay : bayStatus
@@ -364,12 +361,39 @@ try:
                             myMQTTClient.publish(BAY_STATUS_CHANGE_FROM_DEVICE, message, 1)
                         except Exception as e:
                             print(f"An exception occurred while publishing: {e}")                        
+                if info['bay_type'] == 1:
+                    if info['state'] == 0:
+                        GPIO.output(info['yellow_or_green_led'], True)
+                        GPIO.output(info['red_led'], False)
+                    elif info['state'] == 1:
+                        GPIO.output(info['yellow_or_green_led'], False)
+                        GPIO.output(info['red_led'], True)                           
+                elif info['bay_type'] == 2: 
+                    if info['is_bay_booked'] == 0:
+                        if info['state'] == 0:
+                            GPIO.output(info['yellow_or_green_led'], True)
+                            GPIO.output(info['red_led'], False)
+                            GPIO.output(info['blue_led'], False)
+                            
+                        elif info['state'] == 1:
+                            GPIO.output(info['yellow_or_green_led'], True)
+                            GPIO.output(info['red_led'], True)
+                            GPIO.output(info['blue_led'], True)                        
+                    elif info['is_bay_booked'] == 1:
+                        if info['state'] == 0:
+                            GPIO.output(info['yellow_or_green_led'], True)
+                            GPIO.output(info['red_led'], True)
+                            GPIO.output(info['blue_led'], False)
+                        elif info['state'] == 1:
+                            GPIO.output(info['yellow_or_green_led'], False)
+                            GPIO.output(info['red_led'], False)
+                            GPIO.output(info['blue_led'], True)
+                print(f"{bay} Bay State: {info['state']} Bay Type: {info['bay_type']} Is Bay Booked: {info['is_bay_booked']}")
                 print(f"{bay} Distance: {dist_measured} Bay State: {info['state']}")
                 # Update available bays based on state
                 if info['state'] == 0 and available_bays < max_bays:
                     available_bays += 1
-                if info['is_bay_booked'] == 0:
-                    available_bays +=1
+                    
 
             lcd.clear()
             lcd.message(f"Available bays:{available_bays}")
@@ -378,9 +402,9 @@ try:
 # Break out
 except KeyboardInterrupt:
     print("Terminating module")
-#     lcd.clear()
-#     all_pins_to_off()
+    lcd.clear()
+    all_pins_to_off()
 #     
 # # Cleanup
-# finally:
-#     all_pins_to_off()
+finally:
+    all_pins_to_off()
