@@ -1,6 +1,10 @@
 # Group3-CITS5506-2023
 Repository for Group 3 Course CITS5506 2023 Second Semester
 
+# Final Code to Use in Presentation and Vide
+1. webApplication/indexAlternate.py
+2. 8. RPI Local Script/integration_scriptV3.py
+
 ## To Do List
 ### raspberry Script
     - make a v4 of asad's local script that actually 
