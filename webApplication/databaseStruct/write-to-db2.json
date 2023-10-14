@@ -1,0 +1,19 @@
+{
+    "locationCoordinate": [
+        {
+            "PutRequest": {
+                "Item": {
+                    "locationName": {
+                        "S": "UWA Car Park 21"
+                    },
+                    "parking_bay_status": {
+                        "S": "-31.98077494842815"
+                    },
+                    "parking_bay_type": {
+                        "S": "115.8153715259373"
+                    }
+                }
+            }
+        }
+    ]
+}

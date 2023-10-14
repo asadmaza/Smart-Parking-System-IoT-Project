@@ -1,0 +1,19 @@
+{
+    "TableName": "locationCoordinate",
+    "KeySchema": [
+        {
+            "AttributeName": "locationName",
+            "KeyType": "HASH"
+        }
+    ],
+    "AttributeDefinitions": [
+        {
+            "AttributeName": "locationName",
+            "AttributeType": "S"
+        }
+    ],
+    "ProvisionedThroughput": {
+        "ReadCapacityUnits": 5,
+        "WriteCapacityUnits": 5
+    }
+}
