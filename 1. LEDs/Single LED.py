@@ -19,20 +19,37 @@ from gpio_reset import all_pins_to_off
 # Set all pins to off before main code
 all_pins_to_off()
 # Ensure LED is connected to GPIO 4
-lonely_led = 4
+first_red = 6
+first_green = 5
+
+second_red = 27
+first_yellow = 17
+blue = 10
 
 # GPIO config
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
-GPIO.setup(lonely_led, GPIO.OUT)
+GPIO.setup(first_red, GPIO.OUT)
+GPIO.setup(first_green, GPIO.OUT)
+GPIO.setup(second_red, GPIO.OUT)
+GPIO.setup(first_yellow, GPIO.OUT)
+GPIO.setup(blue, GPIO.OUT)
 
 # Indefinite loop for LED
 try:
     while True:
-        GPIO.output(lonely_led, True)
+        GPIO.output(first_red, True)
+        GPIO.output(first_green, True)
+        GPIO.output(second_red, True)
+        GPIO.output(first_yellow, True)
+        GPIO.output(blue, True)
         print("LED on")
         sleep(1)
-        GPIO.output(lonely_led, False)
+        GPIO.output(first_red, False)
+        GPIO.output(first_green, False)
+        GPIO.output(second_red, False)
+        GPIO.output(first_yellow, False)
+        GPIO.output(blue, False)
         print("LED off")
         sleep(1)
 
