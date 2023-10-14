@@ -29,9 +29,6 @@ def customCallback(client, userdata, message):
     if(message.topic == BAY_STATUS_CHANGE_FROM_DEVICE):
         print("Received a bay status change from device : ")
         statusChangeFromDevice(message.payload.decode("utf-8"))
-    elif(message.topic == INIT_BAY_STATE):
-        print("Received a feedback message from device : ")
-        giveinitialBayState()
 
 # AWS IoT client setup
 myMQTTClient.configureEndpoint("a30y98prchbi0n-ats.iot.us-west-2.amazonaws.com", 8883)
@@ -50,41 +47,6 @@ scheduler.start()
 
 trusted_proxies = ('127.0.0.1')
 
-def giveinitialBayState():
-    # To-Do -> implement this function
-    # query and get all the parking bay detail
-    # publish to the raspberry pi
-    arrayOfParkingBay = []
-
-    dynamoDBQuery = dynamo_client.scan(TableName="parking_bay_detail2")
-    # need to check if the request success or not
-    for x in dynamoDBQuery["Items"]:
-        parkingBayName = ""
-        parkingBayType = 0
-        parkingBayStatus = 0
-        for y in x:
-            if( y == "parking_bay_name"):
-                parkingBayName = x[y]["S"]
-            elif( y == "parking_bay_type"):
-                parkingBayType = int(x[y]["N"])
-            elif( y == "parking_bay_status"):
-                parkingBayStatus = int(x[y]["N"])
-
-        parkingBayData = {
-            "parkingBayName":parkingBayName,
-            "status": parkingBayStatus,
-            "parkingType" : parkingBayType
-        }
-
-        arrayOfParkingBay.append(parkingBayData)
-
-    result = {
-        "message":sorted(arrayOfParkingBay, key=lambda d: d["parkingBayName"])
-    }
-    myMQTTClient.publish(INIT_BAY_STATE, json.dumps(result), 1)  
-
-    return redirect("/", 200)
-
 @app.route("/")
 def homePage():
     # Check IP validation, if ip address for admin then show navbar to go to statistics and camera stream
@@ -97,6 +59,7 @@ def homePage():
         parkingBayName = ""
         parkingBayType = 0
         parkingBayStatus = 0
+        isBayBooked = 2
         for y in x:
             if( y == "parking_bay_name"):
                 parkingBayName = x[y]["S"]
@@ -104,13 +67,16 @@ def homePage():
                 parkingBayType = int(x[y]["N"])
             elif( y == "parking_bay_status"):
                 parkingBayStatus = int(x[y]["N"])
+            elif( y == "is_bay_booked"):
+                isBayBooked = int(x[y]["N"])                
         if (parkingBayStatus == 0):
             totalAvailableParkingBay = totalAvailableParkingBay + 1
 
         parkingBayData = {
             "parkingBayName":parkingBayName,
             "status": parkingBayStatus,
-            "parkingType" : parkingBayType
+            "parkingType" : parkingBayType,
+            "isBayBooked" : isBayBooked
         }
 
         arrayOfParkingBay.append(parkingBayData)
@@ -137,7 +103,7 @@ def bookingForm(parking_bay):
         timeOut = request.form["tOut"]
 
         print("a bay is being reserved")
-        bayStatus = {parking_bay:2}
+        bayStatus = {parking_bay:1} #by definition change to is bay booked
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # Update timestamp here
         message = json.dumps({"timestamp": timestamp, "data": bayStatus})
 
@@ -155,9 +121,14 @@ def bookingForm(parking_bay):
                 }
             },
             AttributeUpdates={
-                "parking_bay_status": {
+                "parking_bay_type": {
                     "Value": {
                         "N": "2"
+                    },
+                    "Action": "PUT"
+                },"is_bay_booked": {
+                    "Value": {
+                        "N": "1"
                     },
                     "Action": "PUT"
                 }
@@ -242,10 +213,10 @@ def resettingExpiredBay():
                     parkingBayName = x[y]["S"]
                 elif( y == "parking_bay_type"):
                     parkingBayType = int(x[y]["N"])
-                elif( y == "parking_bay_status"):
-                    parkingBayStatus = int(x[y]["N"])
+                elif( y == "is_bay_booked"):
+                    isBayBooked = int(x[y]["N"])
 
-            if ((parkingBayType == 2) and (parkingBayStatus == 2)):
+            if ((parkingBayType == 2) and (isBayBooked == 1)):
                 arrayOfParkingBay.append(parkingBayName)
 
         queryAllBayLog = dynamo_client.scan(TableName="parking_bay_log")
@@ -308,7 +279,7 @@ def resettingExpiredBay():
                         }
                     },
                     AttributeUpdates={
-                        "parking_bay_status": {
+                        "is_bay_booked": {
                             "Value": {
                                 "N": "0"
                             },
@@ -322,7 +293,7 @@ def resettingExpiredBay():
                 bayStatus = {}
 
                 for bayName in arrayOfParkingBayName:
-                    bayStatus[bayName] = 0
+                    bayStatus[bayName] = 0 #by definition change to is bay booked
 
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # Update timestamp here
                 message = json.dumps({"timestamp": timestamp, "data": bayStatus})
@@ -400,6 +371,12 @@ def statusChangeFromDevice(messagePayload):
                             "N": str(statusChange)
                         },
                         "Action": "PUT"
+                    },
+                    "is_bay_booked": {
+                        "Value": {
+                            "N": "0"
+                        },
+                        "Action": "PUT"
                     }
                 },
             )
@@ -426,7 +403,13 @@ def statusChangeFromDevice(messagePayload):
                             "N": str(totalMinutes)
                         },
                         "Action": "PUT"
-                    }
+                    },
+                    "is_booking_expired": {
+                        "Value": {
+                            "N": "1"
+                        },
+                        "Action": "PUT"
+                    },
                 },
             )
 
@@ -440,7 +423,8 @@ def statusChangeFromDevice(messagePayload):
             for x in queryParkingBayDetail["Items"]:
                 if ( x["parking_bay_name"]["S"] == parkingName ):
                     parkingBayType = int(x["parking_bay_type"]["N"])
-            if(parkingBayType == 2):
+                    isBayBooked = int(x["is_bay_booked"]["N"])
+            if(parkingBayType == 2 and isBayBooked == 1): # legal entry
                 print("entering a booked bay")
                 # update existing item (latest book log for that bay)
                 bookedParkingLog = []
@@ -474,12 +458,6 @@ def statusChangeFromDevice(messagePayload):
                         }
                     },
                     AttributeUpdates={
-                        "is_booking_expired": {
-                            "Value": {
-                                "N": "1"
-                            },
-                            "Action": "PUT"
-                        },
                         "parking_bay_entry_time": {
                             "Value": {
                                 "S": str(timeStampDateObject)                            
@@ -491,8 +469,55 @@ def statusChangeFromDevice(messagePayload):
                 ) 
                 print(responseUpdateLogDetail)
                 # need to check if the request success or not        
-
-            else:
+            elif(parkingBayType == 2 and isBayBooked == 0): # illegal entry
+                print("entering a reserved bay without any reservation")
+                responsePutLog = dynamo_client.put_item(
+                    TableName="parking_bay_log",
+                    Item={
+                        "UUID" : {
+                            "S": str(timeStampDateObject)
+                        },
+                        "parking_bay_name": {
+                            "S": parkingName
+                        },
+                        "parking_bay_entry_time": {
+                            "S": str(timeStampDateObject)
+                        },
+                        "parking_bay_exit_time": {
+                            "S": ""
+                        },
+                        "parking_bay_total_minutes": {
+                            "N": "0"
+                        },
+                        "customer_full_name": {
+                            "S": ""
+                        },
+                        "customer_email": {
+                            "S": ""
+                        },
+                        "customer_phone_number": {
+                            "S": ""
+                        },
+                        "customer_plate_number": {
+                            "S": ""
+                        },
+                        "booking_entry_time": {
+                            "S": ""
+                        },
+                        "booking_exit_time": {
+                            "S": ""
+                        },
+                        "is_booking_expired": {
+                            "N": "1"
+                        },
+                        "is_bay_booked": {
+                            "N": "0"
+                        },
+                    }
+                )
+                # need to check if the request success or not
+                print(responsePutLog)
+            elif(parkingBayType == 1):
                 print("entering a normal bay")
                 # put a new item
                 responsePutLog = dynamo_client.put_item(
