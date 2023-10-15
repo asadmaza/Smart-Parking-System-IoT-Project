@@ -247,57 +247,57 @@ def resettingExpiredBay():
                     isBooked = log[y]["N"]
                 elif ( y == "booking_exit_time" ):
                     bookingExitTime = log[y]["S"]
-
-            datetime_object = datetime.strptime(bookingExitTime, "%Y-%m-%d %H:%M:%S")
             
-            if((isBooked == "1") and (isExpired == "0") and (datetime.now() > datetime_object)):
-                responseUpdateLogDetail = dynamo_client.update_item(
-                        TableName="parking_bay_log",
+            if (isBooked == "1") and (isExpired == "0"):
+                datetime_object = datetime.strptime(bookingExitTime, "%Y-%m-%d %H:%M:%S")
+                if (datetime.now() > datetime_object):
+                    responseUpdateLogDetail = dynamo_client.update_item(
+                            TableName="parking_bay_log",
+                            Key={
+                                "UUID": {
+                                    "S": tableID
+                                }
+                            },
+                            AttributeUpdates={
+                                "is_booking_expired": {
+                                    "Value": {
+                                        "N": "1"
+                                    },
+                                    "Action": "PUT"
+                                }
+                            },
+                        )  
+                    
+                    # need to check if the request success or not
+                    print(responseUpdateLogDetail)
+
+                    responseUpdateBayDetail = dynamo_client.update_item(
+                        TableName="parking_bay_detail2",
                         Key={
-                            "UUID": {
-                                "S": tableID
+                            "parking_bay_name": {
+                                "S": parkingBayName
                             }
                         },
                         AttributeUpdates={
-                            "is_booking_expired": {
+                            "is_bay_booked": {
                                 "Value": {
-                                    "N": "1"
+                                    "N": "0"
                                 },
                                 "Action": "PUT"
                             }
                         },
                     )  
-                
-                # need to check if the request success or not
-                print(responseUpdateLogDetail)
+                    # need to check if the request success or not
+                    print(responseUpdateBayDetail)
 
-                responseUpdateBayDetail = dynamo_client.update_item(
-                    TableName="parking_bay_detail2",
-                    Key={
-                        "parking_bay_name": {
-                            "S": parkingBayName
-                        }
-                    },
-                    AttributeUpdates={
-                        "is_bay_booked": {
-                            "Value": {
-                                "N": "0"
-                            },
-                            "Action": "PUT"
-                        }
-                    },
-                )  
-                # need to check if the request success or not
-                print(responseUpdateBayDetail)
+                    bayStatus = {}
 
-                bayStatus = {}
+                    for bayName in arrayOfParkingBayName:
+                        bayStatus[bayName] = 0 #by definition change to is bay booked
 
-                for bayName in arrayOfParkingBayName:
-                    bayStatus[bayName] = 0 #by definition change to is bay booked
-
-                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # Update timestamp here
-                message = json.dumps({"timestamp": timestamp, "data": bayStatus})
-                myMQTTClient.publish(SEND_BAY_CHANGE_STATUS_WHEN_RESERVATION_EXPIRED, json.dumps(message), 1)
+                    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # Update timestamp here
+                    message = json.dumps({"timestamp": timestamp, "data": bayStatus})
+                    myMQTTClient.publish(SEND_BAY_CHANGE_STATUS_WHEN_RESERVATION_EXPIRED, json.dumps(message), 1)
                 
     return redirect("/",200)
 
