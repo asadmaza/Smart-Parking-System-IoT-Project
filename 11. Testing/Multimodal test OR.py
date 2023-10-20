@@ -95,9 +95,9 @@ threshold_min = 0.0 # in cm
 continue_loop = "Yes"
 
 # Initialise threshold value
-sensor_threshold = 0.10 # in percent (e.g. 10% = 0.10)
+sensor_threshold = 0.01 # in percent (e.g. 10% = 0.10)
 
-base_val_threshold = 0.02 # in percent (e.g. 2% = 0.02)
+base_val_threshold = 0.08 # in percent (e.g. 2% = 0.02)
 # Initialise sensor
 magSensor = PiicoDev_QMC6310(range=3000)
 def get_average(data_list):

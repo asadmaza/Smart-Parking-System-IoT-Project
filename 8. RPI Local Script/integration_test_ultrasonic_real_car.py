@@ -3,10 +3,10 @@
 ONLY RUN AFTER YOU HAVE DOUBLE CHECKED CONNECTIONS AS COMPONENTS
 CAN BE DAMAGED IF INCORRECTLY WIRED.
 ====================================================================
-Test file for Smart Parking System Integration on a toy car with
+Test file for Smart Parking System Integration on a real car with
 Ultrasonic sensors.
 
-Current threshold value: threshold_max = 20.0 # in cm
+Current threshold value: threshold_max = 200.0 # in cm
 
 v3.1 Changelog :
 - Initialisation changed, makes it clearer when system is running

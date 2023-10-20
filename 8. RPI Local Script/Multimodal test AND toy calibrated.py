@@ -1,4 +1,16 @@
 """
+
+Threshold values are calibrated for Toy cars in this file, using trial
+and error.
+
+Threshold values:
+Sensor                  |   Variable name
+Ultrasonic sensor       |   threshold_max = 20.0 # in cm
+Magnetometer sensor     |   sensor_threshold = 0.015 # in percent 
+Magnetometer sensor     |   base_val_threshold = 0.005 # in percent
+
+
+
 Multimodal Sensor AND testing file to measure the accuracy and the
 detection of a car in the bay. We will use this file to test a toy
 car and a real car.

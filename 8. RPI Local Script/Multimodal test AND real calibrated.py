@@ -1,14 +1,18 @@
 """
-==================================================================
-This code fails as there is an issue with Magnetometer's PiicoDev
-library and Adafruit 16x2 LCD Display library we are using. This
-seems to be an I2C Bus Address issue in the libraries, specifically
-with 0x1C
-==================================================================
+
+Threshold values are calibrated for Toy cars in this file, using trial
+and error.
+
+Threshold values:
+Sensor                  |   Variable name
+Ultrasonic sensor       |   threshold_max = 200.0 # in cm
+Magnetometer sensor     |   sensor_threshold = 0.01 # in percent 
+Magnetometer sensor     |   base_val_threshold = 0.008 # in percent
+
+
 
 Multimodal Sensor AND testing file to measure the accuracy and the
-detection of a car in the bay. We will use this file to test a toy
-car and a real car.
+detection of a car in the bay.
 
 This is an AND test - if both sensors detect a car in the bay,
 the LED will turn from Green (free) to Red (occupied)
@@ -19,6 +23,7 @@ x1 5mm Red LED GPIO
 x1 5mm Green LED
 x2 330 ohm resistors
 x1 Ultrasonic Sensor
+x1 Magnetometer
 
 Code description:
 File to test the ultrasonic sensor measurement accuracy, prints out
@@ -49,6 +54,7 @@ SDA to GPIO 2/SDA (in I2C Data mode enabled)
 SCL to GPIO 3/SCL (in I2C Data mode enabled)
 3.3V to 3V Pin
 GND to GND pin
+
 --------------------------------------------------------------------
 
 Date: 10/10/2023
